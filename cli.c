@@ -35,9 +35,9 @@ static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
 },{
   '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',
   'G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V',
-  'W','X','Y','Z',' ',' ',' ',' ','-','x',' ','!','=','=','$',' ',
+  'W','X','Y','Z',' ',' ',' ',' ','-','x','T','!','=','=','$',' ',
   '/','/','\\','\\','.','/','/','\\','\\','\\','-','-','/',' ','-','O',
-  ' ','w','|','|',' ','%',' ','%',' ',' ',' ','#','#','#','#','#',
+  'T','w','|','|',' ','%',' ','%',' ',' ',' ','#','#','#','#','#',
   '#','#',':','?','?','?','?','#','#','#','#','-','O','#','#',' ',
   '#','#','#','#','#','#','#','#','#','#','#','=','=','=','=','=',
   '=','=','=','=','=','|','|','=',' ','=',' ','A','A','A','A','/',
@@ -51,8 +51,46 @@ static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 }};
 
+static const int cli_color_map[2][UINT8_MAX + 1] = {
+{
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  7, 1, 1, 1, 7, 7, 7, 7, 1, 1, 1, 7, 1, 1, 1, 1,
+  3, 3, 3, 3, 1, 1, 1, 1, 7, 5, 5, 5, 5, 5, 5, 5,
+  6, 6, 6, 6, 7, 7, 1, 1, 1, 1, 7, 7, 5, 5, 4, 4,
+  5, 5, 5, 5, 7, 7, 7, 7, 5, 5, 5, 5, 5, 3, 5, 5,
+  1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7,
+  1, 5, 5, 5, 5, 5, 1, 1, 7, 1, 7, 7, 6, 6, 6, 6,
+  2, 2, 5, 5, 3, 2, 2, 4, 4, 4, 4, 2, 2, 2, 2, 7,
+  7, 7, 7, 7, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+},{
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 3, 7,
+  2, 2, 2, 2, 2, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2, 2, 7, 7,
+  7, 2, 2, 2, 2, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 7, 7, 1, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+}};
 
 
+
+static bool cli_enable_colors = false;
 static uint8_t cli_controller_state = 0;
 static uint16_t cli_button_timeout[8] = {0,0,0,0,0,0,0,0};
 static const uint8_t cli_button_map[8] = 
@@ -92,8 +130,9 @@ void cli_resume(void)
 
 
 
-int cli_init(void)
+int cli_init(bool enable_colors)
 {
+  cli_enable_colors = enable_colors;
 #ifndef DISABLE_CLI
   int maxy, maxx;
 
@@ -112,6 +151,17 @@ int cli_init(void)
   keypad(stdscr, TRUE);
   timeout(0); /* Non-blocking mode. */
 
+  if (cli_enable_colors && has_colors()) {
+    start_color();
+    init_pair(1, COLOR_RED,     COLOR_BLACK);
+    init_pair(2, COLOR_GREEN,   COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
+    init_pair(4, COLOR_BLUE,    COLOR_BLACK);
+    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(6, COLOR_CYAN,    COLOR_BLACK);
+    init_pair(7, COLOR_WHITE,   COLOR_BLACK);
+  }
+
 #endif /* DISABLE_CLI */
   return 0;
 }
@@ -128,8 +178,16 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile)
   }
 
   chtype ch = cli_tile_map[table_no][tile];
+  int color_pair = cli_color_map[table_no][tile];
+
   if (! (table_no == 0 && ch == ' ')) {
+    if (cli_enable_colors && has_colors()) {
+      attron(COLOR_PAIR(color_pair));
+    }
     mvaddch(y, x, ch);
+    if (cli_enable_colors && has_colors()) {
+      attroff(COLOR_PAIR(color_pair));
+    }
   }
 }
 

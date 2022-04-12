@@ -284,7 +284,7 @@ static void gui_exit_handler(void)
 
 
 
-int gui_init(void)
+int gui_init(int joystick_no, bool disable_audio)
 {
 #ifdef DISABLE_GUI
   if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) != 0) {
@@ -328,12 +328,16 @@ int gui_init(void)
   }
 #endif /* DISABLE_GUI */
 
-  if (SDL_NumJoysticks() > 0) {
-    gui_joystick = SDL_JoystickOpen(0);
+  if (SDL_NumJoysticks() > joystick_no) {
+    gui_joystick = SDL_JoystickOpen(joystick_no);
     fprintf(stderr, "Found Joystick: %s\n", SDL_JoystickName(gui_joystick));
   }
 
-  return gui_audio_init();
+  if (disable_audio) {
+    return 0;
+  } else {
+    return gui_audio_init();
+  }
 }
 
 
@@ -514,7 +518,7 @@ void gui_update(void)
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
       switch (event.jbutton.button) {
-      case 0: /* A */
+      case 1: /* A */
         if (event.jbutton.state == 1) {
           gui_controller_state |= 0x1;
         } else {
@@ -522,7 +526,9 @@ void gui_update(void)
         }
         break;
 
-      case 1: /* B */
+      case 0: /* B */
+      case 2:
+      case 3:
         if (event.jbutton.state == 1) {
           gui_controller_state |= 0x2;
         } else {
@@ -530,15 +536,15 @@ void gui_update(void)
         }
         break;
 
-      case 4: /* Load State */
+      case 4: /* Save State */
         if (event.jbutton.state == 1) {
-          gui_load_state_request = true;
+          gui_save_state_request = true;
         }
         break;
 
-      case 5: /* Save State */
+      case 5: /* Load State */
         if (event.jbutton.state == 1) {
-          gui_save_state_request = true;
+          gui_load_state_request = true;
         }
         break;
 

@@ -8,6 +8,8 @@
 #include "cli.h"
 #include "panic.h"
 
+#define PPU_PIXEL_UNUSED 255
+
 
 
 static uint8_t ppu_mem_read(ppu_t *ppu, uint16_t address)
@@ -332,14 +334,18 @@ static void ppu_draw_background(ppu_t *ppu, uint8_t pixels[])
         color = ppu->palette_ram[(palette_group * 4) + palette_index];
       }
       x_pixel = ((base_htile * 8) + (7 - pixel_no)) - (ppu->scroll_x % 8);
-      pixels[x_pixel % 256] = color;
+      if (palette_index == 0 && pixels[x_pixel % 256] != PPU_PIXEL_UNUSED) {
+        /* Do not overwrite background sprite! */
+      } else {
+        pixels[x_pixel % 256] = color;
+      }
     }
   }
 }
 
 
 
-static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[])
+static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[], int prio)
 {
   uint8_t nt;
   uint8_t plane1, plane2;
@@ -352,6 +358,10 @@ static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[])
   for (sprite = 0; sprite < PPU_SIZE_SPRITE_RAM; sprite += 4) {
     if (ppu->scanline >= ppu->sprite_ram[sprite] + 1 &&
         ppu->scanline <= ppu->sprite_ram[sprite] + 8) {
+
+      if (((ppu->sprite_ram[sprite+2] >> 5) & 0x1) != prio) {
+        continue;
+      }
 
       nt = ppu->sprite_ram[sprite+1];
 
@@ -404,6 +414,7 @@ static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[])
 void ppu_execute(ppu_t *ppu)
 {
   static uint8_t pixels[256]; /* On 1 scanline. */
+  int i;
 
   if (ppu->status_was_accessed) {
     ppu->status_was_accessed = false;
@@ -427,8 +438,12 @@ void ppu_execute(ppu_t *ppu)
     ppu->nametable_sel = 0;
 
   } else if (ppu->scanline >= 0 && ppu->scanline <= 239 && ppu->dot == 0) {
+    for (i = 0; i < 256; i++) {
+      pixels[i] = PPU_PIXEL_UNUSED;
+    }
+    ppu_draw_sprites(ppu, pixels, 1);
     ppu_draw_background(ppu, pixels);
-    ppu_draw_sprites(ppu, pixels);
+    ppu_draw_sprites(ppu, pixels, 0);
     gui_draw_scanline(ppu->scanline, pixels);
 
   } else if (ppu->scanline == 241 && ppu->dot == 1) {

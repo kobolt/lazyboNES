@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-int gui_init(void);
+int gui_init(int joystick_no, bool disable_audio);
 void gui_draw_scanline(uint16_t y, uint8_t colors[]);
 uint8_t gui_get_controller_state(void);
 void gui_audio_square_update(int channel, uint16_t freq, uint8_t volume);

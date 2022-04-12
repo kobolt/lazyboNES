@@ -6,10 +6,11 @@ Some features:
 * SDL2 graphical output also available and can run in parallel.
 * Use a joystick/gamepad (as detected by SDL2) to play.
 * Keyboard input on the terminal kind of works, but it is very hard to use.
-* PPU (video) emulation supports horizontal scrolling only and bg/sprite priority is NOT implemented.
+* PPU (video) emulation supports horizontal scrolling only.
 * APU (audio) emulation supports pulse/triangle/noise channels, but not DMC.
 * Save/Load state supported but only one slot and only in memory.
 * Ctrl+C in the terminal breaks into a debugger for dumping data.
+* Uses the 8 standard ANSI colors, or monochrome if selected.
 
 How it typically looks:
 ```

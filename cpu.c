@@ -143,7 +143,7 @@ static void cpu_dump_disassemble(FILE *fh, uint16_t pc, uint8_t mc[3])
 
   case AM_NONE:
   default:
-    fprintf(fh, "-       ");
+    fprintf(fh, "-           ");
     break;
   }
 
@@ -286,13 +286,12 @@ void cpu_trace_add(cpu_t *cpu, mem_t *mem)
 
 
 
-static uint8_t cpu_status_get(cpu_t *cpu)
+static uint8_t cpu_status_get(cpu_t *cpu, bool b_flag)
 {
-  /* NOTE: Break flag is set, as needed by PHP and BRK. */
   return ((cpu->sr.n << 7) +
           (cpu->sr.v << 6) +
           (1         << 5) +
-          (1         << 4) +
+          (b_flag    << 4) +
           (cpu->sr.d << 3) +
           (cpu->sr.i << 2) +
           (cpu->sr.z << 1) +
@@ -303,9 +302,9 @@ static uint8_t cpu_status_get(cpu_t *cpu)
 
 static void cpu_status_set(cpu_t *cpu, uint8_t flags)
 {
-  /* NOTE: Break flag is discarded, as needed by PLP and RTI. */
   cpu->sr.n = (flags >> 7) & 0x1;
   cpu->sr.v = (flags >> 6) & 0x1;
+  cpu->sr.b = 0;
   cpu->sr.d = (flags >> 3) & 0x1;
   cpu->sr.i = (flags >> 2) & 0x1;
   cpu->sr.z = (flags >> 1) & 0x1;
@@ -793,9 +792,9 @@ static void op_brk(cpu_t *cpu, mem_t *mem)
 {
   mem_write(mem, MEM_PAGE_STACK + cpu->sp--, (cpu->pc + 1) / 256);
   mem_write(mem, MEM_PAGE_STACK + cpu->sp--, (cpu->pc + 1) % 256);
-  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu));
+  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu, 1));
   cpu->sr.i = 1;
-  cpu->sr.b = 1; /* Set for visualization only, not really used. */
+  cpu->sr.b = 1;
   cpu->pc  = mem_read(mem, MEM_VECTOR_IRQ_LOW);
   cpu->pc += mem_read(mem, MEM_VECTOR_IRQ_HIGH) * 256;
 }
@@ -1438,7 +1437,7 @@ static void op_pha(cpu_t *cpu, mem_t *mem)
 
 static void op_php(cpu_t *cpu, mem_t *mem)
 {
-  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu));
+  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu, 1));
 }
 
 static void op_pla(cpu_t *cpu, mem_t *mem)
@@ -1605,7 +1604,6 @@ static void op_ror_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_rti(cpu_t *cpu, mem_t *mem)
 {
-  cpu->sr.b = 0; /* Cleared for visualization only, not really used. */
   cpu_status_set(cpu, mem_read(mem, MEM_PAGE_STACK + (++cpu->sp)));
   cpu->pc  = mem_read(mem, MEM_PAGE_STACK + (++cpu->sp));
   cpu->pc += mem_read(mem, MEM_PAGE_STACK + (++cpu->sp)) * 256;
@@ -1934,7 +1932,7 @@ void cpu_nmi(cpu_t *cpu, mem_t *mem)
 {
   mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu->pc / 256);
   mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu->pc % 256);
-  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu));
+  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu, 0));
   cpu->sr.i = 1;
   cpu->pc  = mem_read(mem, MEM_VECTOR_NMI_LOW);
   cpu->pc += mem_read(mem, MEM_VECTOR_NMI_HIGH) * 256;

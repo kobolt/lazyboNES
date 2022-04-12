@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "cpu.h"
 #include "mem.h"
@@ -60,6 +61,22 @@ static bool debugger(void)
     }
 
     switch (cmd[0]) {
+    case '?':
+    case 'h':
+      fprintf(stdout, "Commands:\n");
+      fprintf(stdout, "  q - Quit\n");
+      fprintf(stdout, "  h - Help\n");
+      fprintf(stdout, "  c - Continue\n");
+      fprintf(stdout, "  n - Continue until next NMI\n");
+      fprintf(stdout, "  s - Step\n");
+      fprintf(stdout, "  1 - Dump CPU Trace\n");
+      fprintf(stdout, "  2 - Dump ZP/Stack/Vectors\n");
+      fprintf(stdout, "  3 - Dump PPU NT/AT/RAM\n");
+      fprintf(stdout, "  4 - Dump PPU Pattern Tables\n");
+      fprintf(stdout, "  5 - Dump APU\n");
+      fprintf(stdout, "  6 - Dump other RAM\n");
+      break;
+
     case 'c': /* Continue */
       return false;
 
@@ -75,8 +92,12 @@ static bool debugger(void)
       break;
 
     case '1':
+#ifdef CPU_TRACE
       fprintf(stdout, "CPU Trace:\n");
       cpu_trace_dump(stdout);
+#else
+      fprintf(stdout, "CPU trace not compiled in!\n");
+#endif
       break;
 
     case '2':
@@ -160,11 +181,62 @@ void debug(void)
 
 
 
+static void display_help(const char *progname)
+{
+  fprintf(stdout, "Usage: %s <options> [rom]\n", progname);
+  fprintf(stdout, "Options:\n"
+    "  -h      Display this help.\n"
+    "  -d      Break into debugger on start.\n"
+    "  -a      Disable SDL audio.\n"
+    "  -c      Disable terminal colors.\n"
+    "  -j NO   Use SDL joystick NO instead of 0.\n"
+    "\n");
+}
+
+
+
 int main(int argc, char *argv[])
 {
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s <rom>\n", argv[0]);
+  int c;
+  char *rom_filename = NULL;
+  bool disable_audio = false;
+  bool enable_colors = true;
+  int joystick_no = 0;
+
+  while ((c = getopt(argc, argv, "hdacj:")) != -1) {
+    switch (c) {
+    case 'h':
+      display_help(argv[0]);
+      return 0;
+
+    case 'd':
+      debugger_break = true;
+      break;
+
+    case 'a':
+      disable_audio = true;
+      break;
+
+    case 'c':
+      enable_colors = false;
+      break;
+
+    case 'j':
+      joystick_no = atoi(optarg);
+      break;
+
+    case '?':
+    default:
+      display_help(argv[0]);
+      return 1;
+    }
+  }
+
+  if (argc <= optind) {
+    display_help(argv[0]);
     return 1;
+  } else {
+    rom_filename = argv[optind];
   }
 
   cpu_trace_init();
@@ -174,17 +246,17 @@ int main(int argc, char *argv[])
   ppu_init(&main_ppu, &main_mem);
   apu_init(&main_apu, &main_mem);
 
-  if (ines_load(argv[1], &main_mem, &main_ppu) != 0) {
+  if (ines_load(rom_filename, &main_mem, &main_ppu) != 0) {
     fprintf(stderr, "Unable to load ROM: %s\n", argv[1]);
     return 1;
   }
 
-  if (gui_init() != 0) {
+  if (gui_init(joystick_no, disable_audio) != 0) {
     fprintf(stderr, "Failed to initialize GUI!\n");
     return 1;
   }
 
-  if (cli_init() != 0) {
+  if (cli_init(enable_colors) != 0) {
     fprintf(stderr, "Failed to initialize CLI!\n");
     return 1;
   }

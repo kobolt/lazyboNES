@@ -1,0 +1,40 @@
+# set PATH=..\mingw32\bin;%PATH%
+# set PDCURSES_SRCDIR=../PDCurses-3.9
+# mingw32-make.exe -f %PDCURSES_SRCDIR%/wincon/Makefile
+# mingw32-make.exe -f Makefile.mingw
+
+CFLAGS=-Wall -Wextra -lSDL2 -lm -I../PDCurses-3.9 -I../SDL2-2.0.20/i686-w64-mingw32/include -L../SDL2-2.0.20/i686-w64-mingw32/lib -DF32_AUDIO
+
+all: lazyboNES
+
+lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o gui.o cli.o pdcurses.a
+	gcc -o lazyboNES $^ ${CFLAGS}
+
+main.o: main.c
+	gcc -c $^ ${CFLAGS}
+
+cpu.o: cpu.c
+	gcc -c $^ ${CFLAGS}
+
+mem.o: mem.c
+	gcc -c $^ ${CFLAGS}
+
+ines.o: ines.c
+	gcc -c $^ ${CFLAGS}
+
+ppu.o: ppu.c
+	gcc -c $^ ${CFLAGS}
+
+apu.o: apu.c
+	gcc -c $^ ${CFLAGS}
+
+gui.o: gui.c
+	gcc -c $^ ${CFLAGS}
+
+cli.o: cli.c
+	gcc -c $^ ${CFLAGS}
+
+.PHONY: clean
+clean:
+	rm -f *.o lazyboNES
+
