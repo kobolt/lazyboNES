@@ -523,7 +523,7 @@ void ppu_name_table_dump(FILE *fh, ppu_t *ppu, int table_no)
   table_no *= PPU_SIZE_NAME_TABLE;
 
   for (vtile = 0; vtile < 30; vtile++) {
-    fprintf(fh, "$%04x  ", 0x2000 + (table_no * 0x400) + (vtile * 32));
+    fprintf(fh, "$%04x  ", 0x2000 + table_no + (vtile * 32));
     for (htile = 0; htile < 32; htile++) {
       nt = ppu->name_table[table_no + htile + (vtile * 32)];
       fprintf(fh, "%02x", nt);

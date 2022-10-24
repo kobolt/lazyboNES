@@ -5,6 +5,12 @@
 #include <curses.h>
 #include <signal.h>
 
+#ifdef EXTRA_INFO
+#include "mem.h"
+#include "ppu.h"
+#include "apu.h"
+#endif
+
 
 
 #define CLI_WIDTH 32
@@ -95,6 +101,9 @@ static uint8_t cli_controller_state = 0;
 static uint16_t cli_button_timeout[8] = {0,0,0,0,0,0,0,0};
 static const uint8_t cli_button_map[8] = 
   {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+
+static bool cli_freeze = false;
+static bool cli_freeze_step = false;
 
 
 
@@ -200,7 +209,11 @@ uint8_t cli_get_controller_state(void)
 
 
 
+#ifdef EXTRA_INFO
+void cli_update(mem_t *mem, ppu_t *ppu, apu_t* apu)
+#else
 void cli_update(void)
+#endif
 {
 #ifndef DISABLE_CLI
   int c, i;
@@ -213,6 +226,63 @@ void cli_update(void)
     }
   }
 
+#ifdef EXTRA_INFO
+  static uint32_t frame_start = 0;
+  static uint32_t frame_end = 0;
+  static bool axe84 = false;
+  int minutes;
+  double seconds;
+
+  /* Check for 400 to appear under TIME. */
+  if (frame_start == 0 &&
+      ppu->name_table[0x7A] == 0x04) { /* '4' Symbol */
+    frame_start = ppu->frame_no;
+  }
+
+  /* Check for the axe at world 8-4. */
+  if (axe84 == false &&
+      mem->ram[0x75F] == 7 && /* World 8 */
+      ppu->name_table[0x21A] == 0x7B) { /* Top-Left Axe */
+    axe84 = true;
+  }
+
+  /* Check if the axe is gone. */
+  if (frame_end == 0 &&
+      axe84 == true &&
+      ppu->name_table[0x21A] == 0x24) { /* Empty Space */
+    frame_end = ppu->frame_no;
+  }
+
+  mvprintw(3, 40, "Frame      : %d", ppu->frame_no);
+  mvprintw(4, 40, "Sub-Pixel X: 0x%01x", mem->ram[0x400] / 16);
+  mvprintw(5, 40, "Controller : %c%c%c%c%c%c%c%c",
+    apu->controller[0].data.a      ? 'A' : '.',
+    apu->controller[0].data.b      ? 'B' : '.',
+    apu->controller[0].data.select ? 'S' : '.',
+    apu->controller[0].data.start  ? 'T' : '.',
+    apu->controller[0].data.up     ? 'U' : '.',
+    apu->controller[0].data.down   ? 'D' : '.',
+    apu->controller[0].data.left   ? 'L' : '.',
+    apu->controller[0].data.right  ? 'R' : '.');
+  if (frame_start == 0) {
+    mvprintw(6, 40, "Time       : -");
+  } else {
+    if (frame_end == 0) {
+      seconds = (ppu->frame_no - frame_start) / 60.0988;
+    } else {
+      seconds = (frame_end - frame_start) / 60.0988;
+    }
+    minutes = (int)seconds / 60;
+    mvprintw(6, 40, "Time       : %02d:%06.3f",
+      minutes, seconds - (minutes * 60));
+  }
+#endif
+
+  if (cli_freeze_step) {
+    cli_freeze = true;
+    cli_freeze_step = false;
+  }
+cli_update_freeze:
   refresh();
 
   while ((c = getch()) != ERR) {
@@ -266,6 +336,16 @@ void cli_update(void)
       cli_button_timeout[7] = CLI_BUTTON_TIME_SET;
       break;
 
+    case 'P':
+    case 'p':
+      cli_freeze = !cli_freeze;
+      break;
+
+    case '.':
+      cli_freeze = false;
+      cli_freeze_step = true;
+      break;
+
     case 'Q':
     case 'q':
       exit(0);
@@ -274,6 +354,10 @@ void cli_update(void)
     default:
       break;
     }
+  }
+
+  if (cli_freeze) {
+    goto cli_update_freeze;
   }
 #endif /* DISABLE_CLI */
 }

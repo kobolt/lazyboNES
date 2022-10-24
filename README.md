@@ -11,8 +11,9 @@ Some features:
 * Save/Load state supported but only one slot and only in memory.
 * Ctrl+C in the terminal breaks into a debugger for dumping data.
 * Uses the 8 standard ANSI colors, or monochrome if selected.
+* Accepts TAS input in the FM2 format.
 
-How it typically looks:
+Screenshot:
 ```
 
    MARIO          WORLD  TIME

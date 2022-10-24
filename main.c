@@ -15,6 +15,7 @@
 #include "apu.h"
 #include "gui.h"
 #include "cli.h"
+#include "tas.h"
 
 
 
@@ -164,6 +165,8 @@ void panic(const char *format, ...)
 {
   va_list args;
 
+  cli_pause(); /* Turn off to let text appear. */
+
   va_start(args, format);
   vfprintf(stderr, format, args);
   va_end(args);
@@ -185,11 +188,12 @@ static void display_help(const char *progname)
 {
   fprintf(stdout, "Usage: %s <options> [rom]\n", progname);
   fprintf(stdout, "Options:\n"
-    "  -h      Display this help.\n"
-    "  -d      Break into debugger on start.\n"
-    "  -a      Disable SDL audio.\n"
-    "  -c      Disable terminal colors.\n"
-    "  -j NO   Use SDL joystick NO instead of 0.\n"
+    "  -h        Display this help.\n"
+    "  -d        Break into debugger on start.\n"
+    "  -a        Disable SDL audio.\n"
+    "  -c        Disable terminal colors.\n"
+    "  -j NO     Use SDL joystick NO instead of 0.\n"
+    "  -t FILE   Use FM2 FILE as input for TAS.\n"
     "\n");
 }
 
@@ -199,11 +203,12 @@ int main(int argc, char *argv[])
 {
   int c;
   char *rom_filename = NULL;
+  char *tas_filename = NULL;
   bool disable_audio = false;
   bool enable_colors = true;
   int joystick_no = 0;
 
-  while ((c = getopt(argc, argv, "hdacj:")) != -1) {
+  while ((c = getopt(argc, argv, "hdacj:t:")) != -1) {
     switch (c) {
     case 'h':
       display_help(argv[0]);
@@ -223,6 +228,10 @@ int main(int argc, char *argv[])
 
     case 'j':
       joystick_no = atoi(optarg);
+      break;
+
+    case 't':
+      tas_filename = optarg;
       break;
 
     case '?':
@@ -251,6 +260,13 @@ int main(int argc, char *argv[])
     return 1;
   }
 
+  if (tas_filename != NULL) {
+    if (tas_init(tas_filename) != 0) {
+      fprintf(stderr, "Failed to load TAS file: %s\n", tas_filename);
+      return 1;
+    }
+  }
+
   if (gui_init(joystick_no, disable_audio) != 0) {
     fprintf(stderr, "Failed to initialize GUI!\n");
     return 1;
@@ -266,10 +282,22 @@ int main(int argc, char *argv[])
 #ifdef CPU_TRACE
     cpu_trace_add(&main_cpu, &main_mem);
 #endif
-    cpu_execute(&main_cpu, &main_mem);
-    ppu_execute(&main_ppu);
-    ppu_execute(&main_ppu);
-    ppu_execute(&main_ppu);
+
+    /* Let the PPU execute for 2 frames before the CPU starts. */
+    if (main_ppu.frame_no < 2) {
+      ppu_execute(&main_ppu);
+    } else {
+      cpu_execute(&main_cpu, &main_mem);
+    }
+
+    /* Limit PPU execution to three times per CPU cycle spent. */
+    while (main_cpu.cycles > 0) {
+      ppu_execute(&main_ppu);
+      ppu_execute(&main_ppu);
+      ppu_execute(&main_ppu);
+      main_cpu.cycles--;
+    }
+
     apu_execute(&main_apu);
 
     /* Check for vertical blank NMI from PPU. */
@@ -277,7 +305,12 @@ int main(int argc, char *argv[])
       cpu_nmi(&main_cpu, &main_mem);
       main_ppu.trigger_nmi = false;
       gui_update();
+#ifdef EXTRA_INFO
+      cli_update(&main_mem, &main_ppu, &main_apu);
+#else
       cli_update();
+#endif
+      tas_update(main_ppu.frame_no);
 
       if (nmi_break) {
         nmi_break = false;

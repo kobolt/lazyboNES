@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "gui.h"
 #include "cli.h"
+#include "tas.h"
 #include "panic.h"
 
 static uint8_t apu_length_index[32] = {
@@ -409,8 +410,12 @@ void apu_execute(apu_t *apu)
   int i;
 
   /* Data is only fed into controller #1 currently. */
-  apu->controller[0].data.byte = gui_get_controller_state() |
-                                 cli_get_controller_state();
+  if (tas_is_active()) {
+    apu->controller[0].data.byte = tas_get_controller_state();
+  } else {
+    apu->controller[0].data.byte = gui_get_controller_state() |
+                                   cli_get_controller_state();
+  }
 
   /* Runs at 240Hz */
   apu->sequencer_divider++;

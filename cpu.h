@@ -22,6 +22,7 @@ typedef struct cpu_s {
   uint8_t y;       /* Y Register */
   uint8_t sp;      /* Stack Pointer */
   cpu_status_t sr; /* Status Register */
+  uint32_t cycles; /* Internal Cycle Counter */
 } cpu_t;
 
 typedef bool (*cpu_opcode_handler_t)(uint32_t, cpu_t *, mem_t *);

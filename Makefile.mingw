@@ -7,7 +7,7 @@ CFLAGS=-Wall -Wextra -lSDL2 -lm -I../PDCurses-3.9 -I../SDL2-2.0.20/i686-w64-ming
 
 all: lazyboNES
 
-lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o gui.o cli.o pdcurses.a
+lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o gui.o cli.o tas.o pdcurses.a
 	gcc -o lazyboNES $^ ${CFLAGS}
 
 main.o: main.c
@@ -32,6 +32,9 @@ gui.o: gui.c
 	gcc -c $^ ${CFLAGS}
 
 cli.o: cli.c
+	gcc -c $^ ${CFLAGS}
+
+tas.o: tas.c
 	gcc -c $^ ${CFLAGS}
 
 .PHONY: clean
