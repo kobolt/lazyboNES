@@ -46,3 +46,11 @@ Screenshot:
 ################################
 ```
 
+Information on my blog:
+* [lazyboNES Emulator](https://kobolt.github.io/article-194.html)
+* [lazyboNES Emulator TAS Support](https://kobolt.github.io/article-206.html)
+
+YouTube videos:
+* [Text-mode Super Mario Bros](https://www.youtube.com/shorts/0doygelPMto)
+* [SMB 4:54.032 TAS](https://www.youtube.com/watch?v=kDsrsHwDWrY)
+
