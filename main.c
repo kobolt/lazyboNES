@@ -53,12 +53,15 @@ static bool debugger(void)
   int i;
   char cmd[16];
 
-  printf("\n");
+  fprintf(stdout, "\n");
   while (1) {
-    printf("%08d:%04x> ", main_ppu.frame_no, main_cpu.pc);
+    fprintf(stdout, "%08d:%04x> ", main_ppu.frame_no, main_cpu.pc);
 
     if (fgets(cmd, sizeof(cmd), stdin) == NULL) {
-      exit(1);
+      if (feof(stdin)) {
+        exit(EXIT_SUCCESS);
+      }
+      continue;
     }
 
     switch (cmd[0]) {
@@ -89,7 +92,7 @@ static bool debugger(void)
       return false;
 
     case 'q': /* Quit */
-      exit(1);
+      exit(EXIT_SUCCESS);
       break;
 
     case '1':
@@ -172,7 +175,7 @@ void panic(const char *format, ...)
   va_end(args);
 
   crash_dump();
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 
@@ -190,7 +193,9 @@ static void display_help(const char *progname)
   fprintf(stdout, "Options:\n"
     "  -h        Display this help.\n"
     "  -d        Break into debugger on start.\n"
+    "  -v        Disable SDL video.\n"
     "  -a        Disable SDL audio.\n"
+    "  -k        Disable terminal output.\n"
     "  -c        Disable terminal colors.\n"
     "  -j NO     Use SDL joystick NO instead of 0.\n"
     "  -t FILE   Use FM2 FILE as input for TAS.\n"
@@ -204,22 +209,32 @@ int main(int argc, char *argv[])
   int c;
   char *rom_filename = NULL;
   char *tas_filename = NULL;
+  bool disable_video = false;
   bool disable_audio = false;
+  bool disable_terminal = false;
   bool enable_colors = true;
   int joystick_no = 0;
 
-  while ((c = getopt(argc, argv, "hdacj:t:")) != -1) {
+  while ((c = getopt(argc, argv, "hdvakcj:t:")) != -1) {
     switch (c) {
     case 'h':
       display_help(argv[0]);
-      return 0;
+      return EXIT_SUCCESS;
 
     case 'd':
       debugger_break = true;
       break;
 
+    case 'v':
+      disable_video = true;
+      break;
+
     case 'a':
       disable_audio = true;
+      break;
+
+    case 'k':
+      disable_terminal = true;
       break;
 
     case 'c':
@@ -237,13 +252,13 @@ int main(int argc, char *argv[])
     case '?':
     default:
       display_help(argv[0]);
-      return 1;
+      return EXIT_FAILURE;
     }
   }
 
   if (argc <= optind) {
     display_help(argv[0]);
-    return 1;
+    return EXIT_FAILURE;
   } else {
     rom_filename = argv[optind];
   }
@@ -257,24 +272,26 @@ int main(int argc, char *argv[])
 
   if (ines_load(rom_filename, &main_mem, &main_ppu) != 0) {
     fprintf(stderr, "Unable to load ROM: %s\n", argv[1]);
-    return 1;
+    return EXIT_FAILURE;
   }
 
   if (tas_filename != NULL) {
     if (tas_init(tas_filename) != 0) {
       fprintf(stderr, "Failed to load TAS file: %s\n", tas_filename);
-      return 1;
+      return EXIT_FAILURE;
     }
   }
 
-  if (gui_init(joystick_no, disable_audio) != 0) {
+  if (gui_init(joystick_no, disable_video, disable_audio) != 0) {
     fprintf(stderr, "Failed to initialize GUI!\n");
-    return 1;
+    return EXIT_FAILURE;
   }
 
-  if (cli_init(enable_colors) != 0) {
-    fprintf(stderr, "Failed to initialize CLI!\n");
-    return 1;
+  if (! disable_terminal) {
+    if (cli_init(enable_colors) != 0) {
+      fprintf(stderr, "Failed to initialize CLI!\n");
+      return EXIT_FAILURE;
+    }
   }
 
   cpu_reset(&main_cpu, &main_mem);
@@ -340,7 +357,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 

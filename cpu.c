@@ -37,73 +37,73 @@ typedef struct cpu_trace_s {
 
 
 static cpu_address_mode_t opcode_address_mode[UINT8_MAX + 1] = {
-  AM_IMPL, AM_ZPIX, AM_NONE, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_ACCU, AM_NONE, AM_NONE, AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_NONE, AM_NONE, AM_NONE, AM_ABSX, AM_ABSX, AM_NONE,
-  AM_ABS,  AM_ZPIX, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_ACCU, AM_NONE, AM_ABS,  AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_NONE, AM_NONE, AM_NONE, AM_ABSX, AM_ABSX, AM_NONE,
-  AM_IMPL, AM_ZPIX, AM_NONE, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_ACCU, AM_NONE, AM_ABS,  AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_NONE, AM_NONE, AM_NONE, AM_ABSX, AM_ABSX, AM_NONE,
-  AM_IMPL, AM_ZPIX, AM_NONE, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_ACCU, AM_NONE, AM_ABSI, AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_NONE, AM_NONE, AM_NONE, AM_ABSX, AM_ABSX, AM_NONE,
-  AM_NONE, AM_ZPIX, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_NONE, AM_IMPL, AM_NONE, AM_ABS,  AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_ZPY,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_IMPL, AM_NONE, AM_NONE, AM_ABSX, AM_NONE, AM_NONE,
-  AM_IMM,  AM_ZPIX, AM_IMM,  AM_NONE, AM_ZP,   AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_IMPL, AM_NONE, AM_ABS,  AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_ZPY,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_IMPL, AM_NONE, AM_ABSX, AM_ABSX, AM_ABSY, AM_NONE,
-  AM_IMM,  AM_ZPIX, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_IMPL, AM_NONE, AM_ABS,  AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_NONE, AM_NONE, AM_NONE, AM_ABSX, AM_ABSX, AM_NONE,
-  AM_IMM,  AM_ZPIX, AM_NONE, AM_NONE, AM_ZP,   AM_ZP,   AM_ZP,   AM_NONE,
-  AM_IMPL, AM_IMM,  AM_IMPL, AM_NONE, AM_ABS,  AM_ABS,  AM_ABS,  AM_NONE,
-  AM_REL,  AM_ZPYI, AM_NONE, AM_NONE, AM_NONE, AM_ZPX,  AM_ZPX,  AM_NONE,
-  AM_IMPL, AM_ABSY, AM_NONE, AM_NONE, AM_NONE, AM_ABSX, AM_ABSX, AM_NONE,
+  AM_IMPL, AM_ZPIX, AM_NONE, AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_ACCU, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPX,  AM_ZPX,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSX, AM_ABSX,
+  AM_ABS,  AM_ZPIX, AM_NONE, AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_ACCU, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPX,  AM_ZPX,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSX, AM_ABSX,
+  AM_IMPL, AM_ZPIX, AM_NONE, AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_ACCU, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPX,  AM_ZPX,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSX, AM_ABSX,
+  AM_IMPL, AM_ZPIX, AM_NONE, AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_ACCU, AM_IMM,  AM_ABSI, AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPX,  AM_ZPX,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSX, AM_ABSX,
+  AM_IMM,  AM_ZPIX, AM_IMM,  AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_IMPL, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPY,  AM_ZPY,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSY, AM_ABSY,
+  AM_IMM,  AM_ZPIX, AM_IMM,  AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_IMPL, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPY,  AM_ZPY,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSY, AM_ABSY,
+  AM_IMM,  AM_ZPIX, AM_IMM,  AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_IMPL, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPX,  AM_ZPX,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSX, AM_ABSX,
+  AM_IMM,  AM_ZPIX, AM_IMM,  AM_ZPIX, AM_ZP,   AM_ZP,   AM_ZP,   AM_ZP,
+  AM_IMPL, AM_IMM,  AM_IMPL, AM_IMM,  AM_ABS,  AM_ABS,  AM_ABS,  AM_ABS,
+  AM_REL,  AM_ZPYI, AM_NONE, AM_ZPYI, AM_ZPX,  AM_ZPX,  AM_ZPX,  AM_ZPX,
+  AM_IMPL, AM_ABSY, AM_IMPL, AM_ABSY, AM_ABSX, AM_ABSX, AM_ABSX, AM_ABSX,
 };
 
 static char *opcode_mnemonic[UINT8_MAX + 1] = {
-  "BRK", "ORA", "---", "---", "---", "ORA", "ASL", "---", 
-  "PHP", "ORA", "ASL", "---", "---", "ORA", "ASL", "---",
-  "BPL", "ORA", "---", "---", "---", "ORA", "ASL", "---",
-  "CLC", "ORA", "---", "---", "---", "ORA", "ASL", "---",
-  "JSR", "AND", "---", "---", "BIT", "AND", "ROL", "---",
-  "PLP", "AND", "ROL", "---", "BIT", "AND", "ROL", "---",
-  "BMI", "AND", "---", "---", "---", "AND", "ROL", "---",
-  "SEC", "AND", "---", "---", "---", "AND", "ROL", "---",
-  "RTI", "EOR", "---", "---", "---", "EOR", "LSR", "---",
-  "PHA", "EOR", "LSR", "---", "JMP", "EOR", "LSR", "---",
-  "BVC", "EOR", "---", "---", "---", "EOR", "LSR", "---",
-  "CLI", "EOR", "---", "---", "---", "EOR", "LSR", "---",
-  "RTS", "ADC", "---", "---", "---", "ADC", "ROR", "---",
-  "PLA", "ADC", "ROR", "---", "JMP", "ADC", "ROR", "---",
-  "BVS", "ADC", "---", "---", "---", "ADC", "ROR", "---",
-  "SEI", "ADC", "---", "---", "---", "ADC", "ROR", "---",
-  "---", "STA", "---", "---", "STY", "STA", "STX", "---",
-  "DEY", "---", "TXA", "---", "STY", "STA", "STX", "---",
-  "BCC", "STA", "---", "---", "STY", "STA", "STX", "---",
-  "TYA", "STA", "TXS", "---", "---", "STA", "---", "---",
-  "LDY", "LDA", "LDX", "---", "LDY", "LDA", "LDX", "---",
-  "TAY", "LDA", "TAX", "---", "LDY", "LDA", "LDX", "---",
-  "BCS", "LDA", "---", "---", "LDY", "LDA", "LDX", "---",
-  "CLV", "LDA", "TSX", "---", "LDY", "LDA", "LDX", "---",
-  "CPY", "CMP", "---", "---", "CPY", "CMP", "DEC", "---",
-  "INY", "CMP", "DEX", "---", "CPY", "CMP", "DEC", "---",
-  "BNE", "CMP", "---", "---", "---", "CMP", "DEC", "---",
-  "CLD", "CMP", "---", "---", "---", "CMP", "DEC", "---",
-  "CPX", "SBC", "---", "---", "CPX", "SBC", "INC", "---",
-  "INX", "SBC", "NOP", "---", "CPX", "SBC", "INC", "---",
-  "BEQ", "SBC", "---", "---", "---", "SBC", "INC", "---",
-  "SED", "SBC", "---", "---", "---", "SBC", "INC", "---",
+  "BRK", "ORA", "---", "SLO", "NOP", "ORA", "ASL", "SLO",
+  "PHP", "ORA", "ASL", "ANC", "NOP", "ORA", "ASL", "SLO",
+  "BPL", "ORA", "---", "SLO", "NOP", "ORA", "ASL", "SLO",
+  "CLC", "ORA", "NOP", "SLO", "NOP", "ORA", "ASL", "SLO",
+  "JSR", "AND", "---", "RLA", "BIT", "AND", "ROL", "RLA",
+  "PLP", "AND", "ROL", "ANC", "BIT", "AND", "ROL", "RLA",
+  "BMI", "AND", "---", "RLA", "NOP", "AND", "ROL", "RLA",
+  "SEC", "AND", "NOP", "RLA", "NOP", "AND", "ROL", "RLA",
+  "RTI", "EOR", "---", "SRE", "NOP", "EOR", "LSR", "SRE",
+  "PHA", "EOR", "LSR", "ALR", "JMP", "EOR", "LSR", "SRE",
+  "BVC", "EOR", "---", "SRE", "NOP", "EOR", "LSR", "SRE",
+  "CLI", "EOR", "NOP", "SRE", "NOP", "EOR", "LSR", "SRE",
+  "RTS", "ADC", "---", "RRA", "NOP", "ADC", "ROR", "RRA",
+  "PLA", "ADC", "ROR", "ARR", "JMP", "ADC", "ROR", "RRA",
+  "BVS", "ADC", "---", "RRA", "NOP", "ADC", "ROR", "RRA",
+  "SEI", "ADC", "NOP", "RRA", "NOP", "ADC", "ROR", "RRA",
+  "NOP", "STA", "NOP", "SAX", "STY", "STA", "STX", "SAX",
+  "DEY", "NOP", "TXA", "ANE", "STY", "STA", "STX", "SAX",
+  "BCC", "STA", "---", "SHA", "STY", "STA", "STX", "SAX",
+  "TYA", "STA", "TXS", "TAS", "SHY", "STA", "SHX", "SHA",
+  "LDY", "LDA", "LDX", "LAX", "LDY", "LDA", "LDX", "LAX",
+  "TAY", "LDA", "TAX", "LXA", "LDY", "LDA", "LDX", "LAX",
+  "BCS", "LDA", "---", "LAX", "LDY", "LDA", "LDX", "LAX",
+  "CLV", "LDA", "TSX", "LAS", "LDY", "LDA", "LDX", "LAX",
+  "CPY", "CMP", "NOP", "DCP", "CPY", "CMP", "DEC", "DCP",
+  "INY", "CMP", "DEX", "SBX", "CPY", "CMP", "DEC", "DCP",
+  "BNE", "CMP", "---", "DCP", "NOP", "CMP", "DEC", "DCP",
+  "CLD", "CMP", "NOP", "DCP", "NOP", "CMP", "DEC", "DCP",
+  "CPX", "SBC", "NOP", "ISC", "CPX", "SBC", "INC", "ISC",
+  "INX", "SBC", "NOP", "SBC", "CPX", "SBC", "INC", "ISC",
+  "BEQ", "SBC", "---", "ISC", "NOP", "SBC", "INC", "ISC",
+  "SED", "SBC", "NOP", "ISC", "NOP", "SBC", "INC", "ISC",
 };
 
 static cpu_opcode_handler_t cpu_trap_opcode_handler = NULL;
@@ -313,18 +313,6 @@ static void cpu_status_set(cpu_t *cpu, uint8_t flags)
 
 
 
-static inline uint8_t dec_to_bin(uint8_t value)
-{
-  return (value % 0x10) + ((value / 0x10) * 10);
-}
-
-static inline uint8_t bin_to_dec(uint8_t value)
-{
-  return (value % 10) + ((value / 10) * 0x10);
-}
-
-
-
 static inline void cpu_flag_zero_other(cpu_t *cpu, uint8_t value)
 {
   if (value == 0) {
@@ -372,18 +360,10 @@ static inline void cpu_flag_carry_compare(cpu_t *cpu, uint8_t a, uint8_t b)
 
 static inline bool cpu_flag_carry_add(cpu_t *cpu, uint8_t value)
 {
-  if (cpu->sr.d == 1) {
-    if (cpu->a + value + cpu->sr.c > 99) {
-      return 1;
-    } else {
-      return 0;
-    }
+  if (cpu->a + value + cpu->sr.c > 0xFF) {
+    return 1;
   } else {
-    if (cpu->a + value + cpu->sr.c > 0xFF) {
-      return 1;
-    } else {
-      return 0;
-    }
+    return 0;
   }
 }
 
@@ -488,26 +468,40 @@ static inline void cpu_flag_overflow_bit(cpu_t *cpu, uint8_t value)
   zeropage += 1; \
   absolute += mem_read(mem, zeropage) * 256;
 
+#define OP_PROLOGUE_ABSX_BOUNDARY_CHECK \
+  uint16_t absolute; \
+  absolute  = mem_read(mem, cpu->pc++); \
+  absolute += mem_read(mem, cpu->pc++) * 256; \
+  if ((absolute & 0xFF00) != ((absolute + cpu->x) & 0xFF00)) cpu->cycles++; \
+  absolute += cpu->x;
+
+#define OP_PROLOGUE_ABSY_BOUNDARY_CHECK \
+  uint16_t absolute; \
+  absolute  = mem_read(mem, cpu->pc++); \
+  absolute += mem_read(mem, cpu->pc++) * 256; \
+  if ((absolute & 0xFF00) != ((absolute + cpu->y) & 0xFF00)) cpu->cycles++; \
+  absolute += cpu->y; \
+
+#define OP_PROLOGUE_ZPYI_BOUNDARY_CHECK \
+  uint8_t zeropage; \
+  uint16_t absolute; \
+  zeropage  = mem_read(mem, cpu->pc++); \
+  absolute  = mem_read(mem, zeropage); \
+  zeropage += 1; \
+  absolute += mem_read(mem, zeropage) * 256; \
+  if ((absolute & 0xFF00) != ((absolute + cpu->y) & 0xFF00)) cpu->cycles++; \
+  absolute += cpu->y;
+
 
 
 static inline void cpu_logic_adc(cpu_t *cpu, uint8_t value)
 {
   uint8_t initial;
   bool bit;
-  if (cpu->sr.d == 1) {
-    value = dec_to_bin(value);
-    cpu->a = dec_to_bin(cpu->a);
-  }
   initial = cpu->a;
   bit = cpu_flag_carry_add(cpu, value);
   cpu->a += value;
   cpu->a += cpu->sr.c;
-  if (cpu->sr.d == 1) {
-    if (cpu->a > 99) {
-      cpu->a %= 100;
-    }
-    cpu->a = bin_to_dec(cpu->a);
-  }
   cpu->sr.c = bit;
   cpu_flag_overflow_add(cpu, initial, value);
   cpu_flag_negative_other(cpu, cpu->a);
@@ -518,21 +512,11 @@ static inline void cpu_logic_sbc(cpu_t *cpu, uint8_t value)
 {
   uint8_t initial;
   bool bit;
-  if (cpu->sr.d == 1) {
-    value = dec_to_bin(value);
-    cpu->a = dec_to_bin(cpu->a);
-  }
   initial = cpu->a;
   bit = cpu_flag_carry_sub(cpu, value);
   cpu->a -= value;
   if (cpu->sr.c == 0) {
     cpu->a -= 1;
-  }
-  if (cpu->sr.d == 1) {
-    if (cpu->a > 99) {
-      cpu->a -= (255 - 99);
-    }
-    cpu->a = bin_to_dec(cpu->a);
   }
   cpu->sr.c = bit;
   cpu_flag_overflow_sub(cpu, initial, value);
@@ -541,6 +525,8 @@ static inline void cpu_logic_sbc(cpu_t *cpu, uint8_t value)
 }
 
 
+
+/* Documented Opcodes */
 
 static void op_adc_imm(cpu_t *cpu, mem_t *mem)
 {
@@ -557,14 +543,14 @@ static void op_adc_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_adc_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_logic_adc(cpu, value);
 }
 
 static void op_adc_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_logic_adc(cpu, value);
 }
@@ -585,7 +571,7 @@ static void op_adc_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_adc_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_logic_adc(cpu, value);
 }
@@ -614,7 +600,7 @@ static void op_and_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_and_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   cpu->a &= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -622,7 +608,7 @@ static void op_and_absx(cpu_t *cpu, mem_t *mem)
 
 static void op_and_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   cpu->a &= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -646,7 +632,7 @@ static void op_and_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_and_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   cpu->a &= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -724,6 +710,10 @@ static void op_bcc(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.c == 0) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -732,6 +722,10 @@ static void op_bcs(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.c == 1) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -740,6 +734,10 @@ static void op_beq(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.z == 1) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -768,6 +766,10 @@ static void op_bmi(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.n == 1) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -776,6 +778,10 @@ static void op_bne(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.z == 0) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -784,6 +790,10 @@ static void op_bpl(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.n == 0) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -803,6 +813,10 @@ static void op_bvc(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.v == 0) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -811,6 +825,10 @@ static void op_bvs(cpu_t *cpu, mem_t *mem)
 {
   int8_t relative = mem_read(mem, cpu->pc++);
   if (cpu->sr.v == 1) {
+    cpu->cycles++;
+    if ((cpu->pc & 0xFF00) != ((cpu->pc + relative) & 0xFF00)) {
+      cpu->cycles++; /* Crossed a page boundary. */
+    }
     cpu->pc += relative;
   }
 }
@@ -858,7 +876,7 @@ static void op_cmp_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_cmp_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_flag_negative_compare(cpu, cpu->a, value);
   cpu_flag_zero_compare(cpu, cpu->a, value);
@@ -867,7 +885,7 @@ static void op_cmp_absx(cpu_t *cpu, mem_t *mem)
 
 static void op_cmp_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_flag_negative_compare(cpu, cpu->a, value);
   cpu_flag_zero_compare(cpu, cpu->a, value);
@@ -894,7 +912,7 @@ static void op_cmp_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_cmp_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_flag_negative_compare(cpu, cpu->a, value);
   cpu_flag_zero_compare(cpu, cpu->a, value);
@@ -1035,7 +1053,7 @@ static void op_eor_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_eor_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   cpu->a ^= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1043,7 +1061,7 @@ static void op_eor_absx(cpu_t *cpu, mem_t *mem)
 
 static void op_eor_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   cpu->a ^= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1067,7 +1085,7 @@ static void op_eor_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_eor_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   cpu->a ^= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1148,6 +1166,9 @@ static void op_jmp_absi(cpu_t *cpu, mem_t *mem)
   OP_PROLOGUE_ABS
   uint16_t address = mem_read(mem, absolute);
   absolute += 1;
+  if ((absolute & 0xFF) == 0) { /* Page crossing bug. */
+    absolute -= 0x100;
+  }
   address += mem_read(mem, absolute) * 256;
   cpu->pc = address;
 }
@@ -1177,7 +1198,7 @@ static void op_lda_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_lda_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   cpu->a = mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1185,7 +1206,7 @@ static void op_lda_absx(cpu_t *cpu, mem_t *mem)
 
 static void op_lda_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   cpu->a = mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1209,7 +1230,7 @@ static void op_lda_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_lda_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   cpu->a = mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1240,7 +1261,7 @@ static void op_ldx_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_ldx_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   cpu->x = mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->x);
   cpu_flag_zero_other(cpu, cpu->x);
@@ -1279,7 +1300,7 @@ static void op_ldy_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_ldy_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   cpu->y = mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->y);
   cpu_flag_zero_other(cpu, cpu->y);
@@ -1384,7 +1405,7 @@ static void op_ora_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_ora_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   cpu->a |= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1392,7 +1413,7 @@ static void op_ora_absx(cpu_t *cpu, mem_t *mem)
 
 static void op_ora_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   cpu->a |= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1416,7 +1437,7 @@ static void op_ora_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_ora_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   cpu->a |= mem_read(mem, absolute);
   cpu_flag_negative_other(cpu, cpu->a);
   cpu_flag_zero_other(cpu, cpu->a);
@@ -1631,14 +1652,14 @@ static void op_sbc_abs(cpu_t *cpu, mem_t *mem)
 
 static void op_sbc_absx(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSX
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_logic_sbc(cpu, value);
 }
 
 static void op_sbc_absy(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ABSY
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_logic_sbc(cpu, value);
 }
@@ -1659,7 +1680,7 @@ static void op_sbc_zpx(cpu_t *cpu, mem_t *mem)
 
 static void op_sbc_zpyi(cpu_t *cpu, mem_t *mem)
 {
-  OP_PROLOGUE_ZPYI
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
   uint8_t value = mem_read(mem, absolute);
   cpu_logic_sbc(cpu, value);
 }
@@ -1815,6 +1836,757 @@ static void op_tya(cpu_t *cpu, mem_t *mem)
 
 
 
+/* Undocumented Opcodes */
+
+static void op_alr_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  cpu->a &= value;
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+  value = cpu->a;
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  cpu->a = value;
+  cpu->sr.c = bit;
+  cpu_flag_negative_other(cpu, value);
+  cpu_flag_zero_other(cpu, value);
+}
+
+static void op_anc_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  cpu->a &= value;
+  cpu->sr.c = (cpu->a >> 7);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_ane_imm(cpu_t *cpu, mem_t *mem)
+{
+  (void)cpu;
+  (void)mem;
+  panic("ANE undocumented opcode not implemented!\n");
+}
+
+static void op_arr_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  bool bit;
+  cpu->a &= value;
+  cpu->sr.v = ((cpu->a ^ (cpu->a >> 1)) & 0x40) >> 6;
+  bit = cpu->a >> 7;
+  cpu->a >>= 1;
+  cpu->a |= (cpu->sr.c) << 7;
+  cpu->sr.c = bit;
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_dcp_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  uint8_t value = mem_read(mem, absolute);
+  value -= 1;
+  mem_write(mem, absolute, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_dcp_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  uint8_t value = mem_read(mem, absolute);
+  value -= 1;
+  mem_write(mem, absolute, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_dcp_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  uint8_t value = mem_read(mem, absolute);
+  value -= 1;
+  mem_write(mem, absolute, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_dcp_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  uint8_t value = mem_read(mem, zeropage);
+  value -= 1;
+  mem_write(mem, zeropage, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_dcp_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+  uint8_t value = mem_read(mem, zeropage);
+  value -= 1;
+  mem_write(mem, zeropage, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_dcp_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  uint8_t value = mem_read(mem, absolute);
+  value -= 1;
+  mem_write(mem, absolute, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_dcp_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  uint8_t value = mem_read(mem, absolute);
+  value -= 1;
+  mem_write(mem, absolute, value);
+  cpu_flag_negative_compare(cpu, cpu->a, value);
+  cpu_flag_zero_compare(cpu, cpu->a, value);
+  cpu_flag_carry_compare(cpu, cpu->a, value);
+}
+
+static void op_isc_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  uint8_t value = mem_read(mem, absolute);
+  value += 1;
+  mem_write(mem, absolute, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_isc_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  uint8_t value = mem_read(mem, absolute);
+  value += 1;
+  mem_write(mem, absolute, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_isc_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  uint8_t value = mem_read(mem, absolute);
+  value += 1;
+  mem_write(mem, absolute, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_isc_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  uint8_t value = mem_read(mem, zeropage);
+  value += 1;
+  mem_write(mem, zeropage, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_isc_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+  uint8_t value = mem_read(mem, zeropage);
+  value += 1;
+  mem_write(mem, zeropage, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_isc_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  uint8_t value = mem_read(mem, absolute);
+  value += 1;
+  mem_write(mem, absolute, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_isc_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  uint8_t value = mem_read(mem, absolute);
+  value += 1;
+  mem_write(mem, absolute, value);
+  cpu_logic_sbc(cpu, value);
+}
+
+static void op_las_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
+  panic("LAS undocumented opcode not implemented!\n");
+}
+
+static void op_lax_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  cpu->a = mem_read(mem, absolute);
+  cpu->x = mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_lax_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY_BOUNDARY_CHECK
+  cpu->a = mem_read(mem, absolute);
+  cpu->x = mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_lax_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  cpu->a = mem_read(mem, zeropage);
+  cpu->x = mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->x);
+  cpu_flag_zero_other(cpu, cpu->x);
+}
+
+static void op_lax_zpy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPY
+  cpu->a = mem_read(mem, zeropage);
+  cpu->x = mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->x);
+  cpu_flag_zero_other(cpu, cpu->x);
+}
+
+static void op_lax_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI_BOUNDARY_CHECK
+  cpu->a = mem_read(mem, absolute);
+  cpu->x = mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_lax_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  cpu->a = mem_read(mem, absolute);
+  cpu->x = mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_lxa_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  cpu->a |= 0xFF; /* The magic constant. */
+  cpu->a &= value;
+  cpu->x = cpu->a;
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_nop_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  (void)value;
+}
+
+static void op_nop_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  (void)zeropage;
+}
+
+static void op_nop_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+}
+
+static void op_nop_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+}
+
+static void op_nop_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX_BOUNDARY_CHECK
+}
+
+static void op_rla_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rla_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rla_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rla_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rla_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rla_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rla_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b00000001;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a &= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_rra_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_rra_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_rra_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_rra_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_rra_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_rra_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_rra_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  if (cpu->sr.c == 1) {
+    value |= 0b10000000;
+  }
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu_logic_adc(cpu, value);
+}
+
+static void op_sax_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  mem_write(mem, absolute, cpu->a & cpu->x);
+}
+
+static void op_sax_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  mem_write(mem, zeropage, cpu->a & cpu->x);
+}
+
+static void op_sax_zpy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPY
+  mem_write(mem, zeropage, cpu->a & cpu->x);
+}
+
+static void op_sax_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  mem_write(mem, absolute, cpu->a & cpu->x);
+}
+
+static void op_sbx_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  uint16_t temp;
+  temp = (cpu->a & cpu->x) - value;
+  cpu->x = temp;
+  cpu->sr.c = ~(temp >> 8);
+  cpu_flag_negative_other(cpu, cpu->x);
+  cpu_flag_zero_other(cpu, cpu->x);
+}
+
+static void op_sha_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  panic("SHA (absy) undocumented opcode not implemented!\n");
+}
+
+static void op_sha_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  panic("SHA (zpyi) undocumented opcode not implemented!\n");
+}
+
+static void op_shx_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  absolute = ((cpu->x & ((absolute >> 8) + 1)) << 8) | (absolute & 0xff);
+  mem_write(mem, absolute, absolute >> 8);
+}
+
+static void op_shy_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  absolute = ((cpu->y & ((absolute >> 8) + 1)) << 8) | (absolute & 0xff);
+  mem_write(mem, absolute, absolute >> 8);
+}
+
+static void op_slo_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_slo_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_slo_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_slo_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_slo_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_slo_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_slo_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b10000000;
+  value = value << 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a |= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_abs(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABS
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_absx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_zp(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZP
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_zpx(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPX
+  uint8_t value = mem_read(mem, zeropage);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, zeropage, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, zeropage);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_zpyi(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPYI
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_sre_zpix(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ZPIX
+  uint8_t value = mem_read(mem, absolute);
+  bool bit = value & 0b00000001;
+  value = value >> 1;
+  mem_write(mem, absolute, value);
+  cpu->sr.c = bit;
+  cpu->a ^= mem_read(mem, absolute);
+  cpu_flag_negative_other(cpu, cpu->a);
+  cpu_flag_zero_other(cpu, cpu->a);
+}
+
+static void op_tas_absy(cpu_t *cpu, mem_t *mem)
+{
+  OP_PROLOGUE_ABSY
+  panic("TAS undocumented opcode not implemented!\n");
+}
+
+static void op_usbc_imm(cpu_t *cpu, mem_t *mem)
+{
+  uint8_t value = mem_read(mem, cpu->pc++);
+  cpu_logic_sbc(cpu, value);
+}
+
+
+
 static void op_none(cpu_t *cpu, mem_t *mem)
 {
   uint8_t opcode;
@@ -1826,98 +2598,99 @@ static void op_none(cpu_t *cpu, mem_t *mem)
       return;
     }
   }
-  panic("Panic! Unhandled opcode: %02x\n", opcode);
+  panic("CPU jam due to unhandled opcode: %02x\n", opcode);
 }
 
 typedef void (*cpu_operation_func_t)(cpu_t *, mem_t *);
 
 static cpu_operation_func_t opcode_function[UINT8_MAX + 1] = {
-  op_brk,      op_ora_zpix, op_none,     op_none, /* 0x00 -> 0x03 */
-  op_none,     op_ora_zp,   op_asl_zp,   op_none, /* 0x04 -> 0x07 */
-  op_php,      op_ora_imm,  op_asl_accu, op_none, /* 0x08 -> 0x0B */
-  op_none,     op_ora_abs,  op_asl_abs,  op_none, /* 0x0C -> 0x0F */
-  op_bpl,      op_ora_zpyi, op_none,     op_none, /* 0x10 -> 0x13 */
-  op_none,     op_ora_zpx,  op_asl_zpx,  op_none, /* 0x14 -> 0x17 */
-  op_clc,      op_ora_absy, op_none,     op_none, /* 0x18 -> 0x1B */
-  op_none,     op_ora_absx, op_asl_absx, op_none, /* 0x1C -> 0x1F */
-  op_jsr,      op_and_zpix, op_none,     op_none, /* 0x20 -> 0x23 */
-  op_bit_zp,   op_and_zp,   op_rol_zp,   op_none, /* 0x24 -> 0x27 */
-  op_plp,      op_and_imm,  op_rol_accu, op_none, /* 0x28 -> 0x2B */
-  op_bit_abs,  op_and_abs,  op_rol_abs,  op_none, /* 0x2C -> 0x2F */
-  op_bmi,      op_and_zpyi, op_none,     op_none, /* 0x30 -> 0x33 */
-  op_none,     op_and_zpx,  op_rol_zpx,  op_none, /* 0x34 -> 0x37 */
-  op_sec,      op_and_absy, op_none,     op_none, /* 0x38 -> 0x3B */
-  op_none,     op_and_absx, op_rol_absx, op_none, /* 0x3C -> 0x3F */
-  op_rti,      op_eor_zpix, op_none,     op_none, /* 0x40 -> 0x43 */
-  op_none,     op_eor_zp,   op_lsr_zp,   op_none, /* 0x44 -> 0x47 */
-  op_pha,      op_eor_imm,  op_lsr_accu, op_none, /* 0x48 -> 0x4B */
-  op_jmp_abs,  op_eor_abs,  op_lsr_abs,  op_none, /* 0x4C -> 0x4F */
-  op_bvc,      op_eor_zpyi, op_none,     op_none, /* 0x50 -> 0x53 */
-  op_none,     op_eor_zpx,  op_lsr_zpx,  op_none, /* 0x54 -> 0x57 */
-  op_cli,      op_eor_absy, op_none,     op_none, /* 0x58 -> 0x5B */
-  op_none,     op_eor_absx, op_lsr_absx, op_none, /* 0x5C -> 0x5F */
-  op_rts,      op_adc_zpix, op_none,     op_none, /* 0x60 -> 0x63 */
-  op_none,     op_adc_zp,   op_ror_zp,   op_none, /* 0x64 -> 0x67 */
-  op_pla,      op_adc_imm,  op_ror_accu, op_none, /* 0x68 -> 0x6B */
-  op_jmp_absi, op_adc_abs,  op_ror_abs,  op_none, /* 0x6C -> 0x6F */
-  op_bvs,      op_adc_zpyi, op_none,     op_none, /* 0x70 -> 0x73 */
-  op_none,     op_adc_zpx,  op_ror_zpx,  op_none, /* 0x74 -> 0x77 */
-  op_sei,      op_adc_absy, op_none,     op_none, /* 0x78 -> 0x7B */
-  op_none,     op_adc_absx, op_ror_absx, op_none, /* 0x7C -> 0x7F */
-  op_none,     op_sta_zpix, op_none,     op_none, /* 0x80 -> 0x83 */
-  op_sty_zp,   op_sta_zp,   op_stx_zp,   op_none, /* 0x84 -> 0x87 */
-  op_dey,      op_none,     op_txa,      op_none, /* 0x88 -> 0x8B */
-  op_sty_abs,  op_sta_abs,  op_stx_abs,  op_none, /* 0x8C -> 0x8F */
-  op_bcc,      op_sta_zpyi, op_none,     op_none, /* 0x90 -> 0x93 */
-  op_sty_zpx,  op_sta_zpx,  op_stx_zpy,  op_none, /* 0x94 -> 0x97 */
-  op_tya,      op_sta_absy, op_txs,      op_none, /* 0x98 -> 0x9B */
-  op_none,     op_sta_absx, op_none,     op_none, /* 0x9C -> 0x9F */
-  op_ldy_imm,  op_lda_zpix, op_ldx_imm,  op_none, /* 0xA0 -> 0xA3 */
-  op_ldy_zp,   op_lda_zp,   op_ldx_zp,   op_none, /* 0xA4 -> 0xA7 */
-  op_tay,      op_lda_imm,  op_tax,      op_none, /* 0xA8 -> 0xAB */
-  op_ldy_abs,  op_lda_abs,  op_ldx_abs,  op_none, /* 0xAC -> 0xAF */
-  op_bcs,      op_lda_zpyi, op_none,     op_none, /* 0xB0 -> 0xB3 */
-  op_ldy_zpx,  op_lda_zpx,  op_ldx_zpy,  op_none, /* 0xB4 -> 0xB7 */
-  op_clv,      op_lda_absy, op_tsx,      op_none, /* 0xB8 -> 0xBB */
-  op_ldy_absx, op_lda_absx, op_ldx_absy, op_none, /* 0xBC -> 0xBF */
-  op_cpy_imm,  op_cmp_zpix, op_none,     op_none, /* 0xC0 -> 0xC3 */
-  op_cpy_zp,   op_cmp_zp,   op_dec_zp,   op_none, /* 0xC4 -> 0xC7 */
-  op_iny,      op_cmp_imm,  op_dex,      op_none, /* 0xC8 -> 0xCB */
-  op_cpy_abs,  op_cmp_abs,  op_dec_abs,  op_none, /* 0xCC -> 0xCF */
-  op_bne,      op_cmp_zpyi, op_none,     op_none, /* 0xD0 -> 0xD3 */
-  op_none,     op_cmp_zpx,  op_dec_zpx,  op_none, /* 0xD4 -> 0xD7 */
-  op_cld,      op_cmp_absy, op_none,     op_none, /* 0xD8 -> 0xDB */
-  op_none,     op_cmp_absx, op_dec_absx, op_none, /* 0xDC -> 0xDF */
-  op_cpx_imm,  op_sbc_zpix, op_none,     op_none, /* 0xE0 -> 0xE3 */
-  op_cpx_zp,   op_sbc_zp,   op_inc_zp,   op_none, /* 0xE4 -> 0xE7 */
-  op_inx,      op_sbc_imm,  op_nop,      op_none, /* 0xE8 -> 0xEB */
-  op_cpx_abs,  op_sbc_abs,  op_inc_abs,  op_none, /* 0xEC -> 0xEF */
-  op_beq,      op_sbc_zpyi, op_none,     op_none, /* 0xF0 -> 0xF3 */
-  op_none,     op_sbc_zpx,  op_inc_zpx,  op_none, /* 0xF4 -> 0xF7 */
-  op_sed,      op_sbc_absy, op_none,     op_none, /* 0xF8 -> 0xFB */
-  op_none,     op_sbc_absx, op_inc_absx, op_none, /* 0xFC -> 0xFF */
+  op_brk,      op_ora_zpix, op_none,     op_slo_zpix, /* 0x00 -> 0x03 */
+  op_nop_zp,   op_ora_zp,   op_asl_zp,   op_slo_zp,   /* 0x04 -> 0x07 */
+  op_php,      op_ora_imm,  op_asl_accu, op_anc_imm,  /* 0x08 -> 0x0B */
+  op_nop_abs,  op_ora_abs,  op_asl_abs,  op_slo_abs,  /* 0x0C -> 0x0F */
+  op_bpl,      op_ora_zpyi, op_none,     op_slo_zpyi, /* 0x10 -> 0x13 */
+  op_nop_zpx,  op_ora_zpx,  op_asl_zpx,  op_slo_zpx,  /* 0x14 -> 0x17 */
+  op_clc,      op_ora_absy, op_nop,      op_slo_absy, /* 0x18 -> 0x1B */
+  op_nop_absx, op_ora_absx, op_asl_absx, op_slo_absx, /* 0x1C -> 0x1F */
+  op_jsr,      op_and_zpix, op_none,     op_rla_zpix, /* 0x20 -> 0x23 */
+  op_bit_zp,   op_and_zp,   op_rol_zp,   op_rla_zp,   /* 0x24 -> 0x27 */
+  op_plp,      op_and_imm,  op_rol_accu, op_anc_imm,  /* 0x28 -> 0x2B */
+  op_bit_abs,  op_and_abs,  op_rol_abs,  op_rla_abs,  /* 0x2C -> 0x2F */
+  op_bmi,      op_and_zpyi, op_none,     op_rla_zpyi, /* 0x30 -> 0x33 */
+  op_nop_zpx,  op_and_zpx,  op_rol_zpx,  op_rla_zpx,  /* 0x34 -> 0x37 */
+  op_sec,      op_and_absy, op_nop,      op_rla_absy, /* 0x38 -> 0x3B */
+  op_nop_absx, op_and_absx, op_rol_absx, op_rla_absx, /* 0x3C -> 0x3F */
+  op_rti,      op_eor_zpix, op_none,     op_sre_zpix, /* 0x40 -> 0x43 */
+  op_nop_zp,   op_eor_zp,   op_lsr_zp,   op_sre_zp,   /* 0x44 -> 0x47 */
+  op_pha,      op_eor_imm,  op_lsr_accu, op_alr_imm,  /* 0x48 -> 0x4B */
+  op_jmp_abs,  op_eor_abs,  op_lsr_abs,  op_sre_abs,  /* 0x4C -> 0x4F */
+  op_bvc,      op_eor_zpyi, op_none,     op_sre_zpyi, /* 0x50 -> 0x53 */
+  op_nop_zpx,  op_eor_zpx,  op_lsr_zpx,  op_sre_zpx,  /* 0x54 -> 0x57 */
+  op_cli,      op_eor_absy, op_nop,      op_sre_absy, /* 0x58 -> 0x5B */
+  op_nop_absx, op_eor_absx, op_lsr_absx, op_sre_absx, /* 0x5C -> 0x5F */
+  op_rts,      op_adc_zpix, op_none,     op_rra_zpix, /* 0x60 -> 0x63 */
+  op_nop_zp,   op_adc_zp,   op_ror_zp,   op_rra_zp,   /* 0x64 -> 0x67 */
+  op_pla,      op_adc_imm,  op_ror_accu, op_arr_imm,  /* 0x68 -> 0x6B */
+  op_jmp_absi, op_adc_abs,  op_ror_abs,  op_rra_abs,  /* 0x6C -> 0x6F */
+  op_bvs,      op_adc_zpyi, op_none,     op_rra_zpyi, /* 0x70 -> 0x73 */
+  op_nop_zpx,  op_adc_zpx,  op_ror_zpx,  op_rra_zpx,  /* 0x74 -> 0x77 */
+  op_sei,      op_adc_absy, op_nop,      op_rra_absy, /* 0x78 -> 0x7B */
+  op_nop_absx, op_adc_absx, op_ror_absx, op_rra_absx, /* 0x7C -> 0x7F */
+  op_nop_imm,  op_sta_zpix, op_nop_imm,  op_sax_zpix, /* 0x80 -> 0x83 */
+  op_sty_zp,   op_sta_zp,   op_stx_zp,   op_sax_zp,   /* 0x84 -> 0x87 */
+  op_dey,      op_nop_imm,  op_txa,      op_ane_imm,  /* 0x88 -> 0x8B */
+  op_sty_abs,  op_sta_abs,  op_stx_abs,  op_sax_abs,  /* 0x8C -> 0x8F */
+  op_bcc,      op_sta_zpyi, op_none,     op_sha_zpyi, /* 0x90 -> 0x93 */
+  op_sty_zpx,  op_sta_zpx,  op_stx_zpy,  op_sax_zpy,  /* 0x94 -> 0x97 */
+  op_tya,      op_sta_absy, op_txs,      op_tas_absy, /* 0x98 -> 0x9B */
+  op_shy_absx, op_sta_absx, op_shx_absy, op_sha_absy, /* 0x9C -> 0x9F */
+  op_ldy_imm,  op_lda_zpix, op_ldx_imm,  op_lax_zpix, /* 0xA0 -> 0xA3 */
+  op_ldy_zp,   op_lda_zp,   op_ldx_zp,   op_lax_zp,   /* 0xA4 -> 0xA7 */
+  op_tay,      op_lda_imm,  op_tax,      op_lxa_imm,  /* 0xA8 -> 0xAB */
+  op_ldy_abs,  op_lda_abs,  op_ldx_abs,  op_lax_abs,  /* 0xAC -> 0xAF */
+  op_bcs,      op_lda_zpyi, op_none,     op_lax_zpyi, /* 0xB0 -> 0xB3 */
+  op_ldy_zpx,  op_lda_zpx,  op_ldx_zpy,  op_lax_zpy,  /* 0xB4 -> 0xB7 */
+  op_clv,      op_lda_absy, op_tsx,      op_las_absy, /* 0xB8 -> 0xBB */
+  op_ldy_absx, op_lda_absx, op_ldx_absy, op_lax_absy, /* 0xBC -> 0xBF */
+  op_cpy_imm,  op_cmp_zpix, op_nop_imm,  op_dcp_zpix, /* 0xC0 -> 0xC3 */
+  op_cpy_zp,   op_cmp_zp,   op_dec_zp,   op_dcp_zp,   /* 0xC4 -> 0xC7 */
+  op_iny,      op_cmp_imm,  op_dex,      op_sbx_imm,  /* 0xC8 -> 0xCB */
+  op_cpy_abs,  op_cmp_abs,  op_dec_abs,  op_dcp_abs,  /* 0xCC -> 0xCF */
+  op_bne,      op_cmp_zpyi, op_none,     op_dcp_zpyi, /* 0xD0 -> 0xD3 */
+  op_nop_zpx,  op_cmp_zpx,  op_dec_zpx,  op_dcp_zpx,  /* 0xD4 -> 0xD7 */
+  op_cld,      op_cmp_absy, op_nop,      op_dcp_absy, /* 0xD8 -> 0xDB */
+  op_nop_absx, op_cmp_absx, op_dec_absx, op_dcp_absx, /* 0xDC -> 0xDF */
+  op_cpx_imm,  op_sbc_zpix, op_nop_imm,  op_isc_zpix, /* 0xE0 -> 0xE3 */
+  op_cpx_zp,   op_sbc_zp,   op_inc_zp,   op_isc_zp,   /* 0xE4 -> 0xE7 */
+  op_inx,      op_sbc_imm,  op_nop,      op_usbc_imm, /* 0xE8 -> 0xEB */
+  op_cpx_abs,  op_sbc_abs,  op_inc_abs,  op_isc_abs,  /* 0xEC -> 0xEF */
+  op_beq,      op_sbc_zpyi, op_none,     op_isc_zpyi, /* 0xF0 -> 0xF3 */
+  op_nop_zpx,  op_sbc_zpx,  op_inc_zpx,  op_isc_zpx,  /* 0xF4 -> 0xF7 */
+  op_sed,      op_sbc_absy, op_nop,      op_isc_absy, /* 0xF8 -> 0xFB */
+  op_nop_absx, op_sbc_absx, op_inc_absx, op_isc_absx, /* 0xFC -> 0xFF */
 };
 
 
 
-/* NOTE: Cycles does not take page boundary into consideration. */
+/* Base cycles when page boundary crossing is not considered. */
 static uint8_t opcode_cycles[UINT8_MAX + 1] = {
-  7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 0, 4, 6, 0, /* 0x0- */
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, /* 0x1- */
-  6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 0, 4, 4, 6, 0, /* 0x2- */
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, /* 0x3- */
-  6, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 3, 4, 6, 0, /* 0x4- */
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, /* 0x5- */
-  6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, /* 0x6- */
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, /* 0x7- */
-  0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, /* 0x8- */
-  2, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, /* 0x9- */
-  2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, /* 0xA- */
-  2, 5, 0, 0, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, /* 0xB- */
-  2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, /* 0xC- */
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, /* 0xD- */
-  2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, /* 0xE- */
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, /* 0xF- */
+/* -0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -A -B -C -D -E -F */
+    7, 6, 0, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6, /* 0x0- */
+    2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, /* 0x1- */
+    6, 6, 0, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6, /* 0x2- */
+    2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, /* 0x3- */
+    6, 6, 0, 8, 3, 3, 5, 5, 3, 2, 2, 2, 3, 4, 6, 6, /* 0x4- */
+    2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, /* 0x5- */
+    6, 6, 0, 8, 3, 3, 5, 5, 4, 2, 2, 2, 5, 4, 6, 6, /* 0x6- */
+    2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, /* 0x7- */
+    2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, /* 0x8- */
+    2, 6, 0, 6, 4, 4, 4, 4, 2, 5, 2, 5, 5, 5, 5, 5, /* 0x9- */
+    2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, /* 0xA- */
+    2, 5, 0, 5, 4, 4, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4, /* 0xB- */
+    2, 6, 2, 8, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6, /* 0xC- */
+    2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, /* 0xD- */
+    2, 6, 2, 8, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6, /* 0xE- */
+    2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, /* 0xF- */
 };
 
 

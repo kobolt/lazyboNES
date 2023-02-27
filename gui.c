@@ -10,6 +10,9 @@
 #define GUI_WIDTH 256
 #define GUI_HEIGHT 240
 
+#define GUI_W_SCALE 3
+#define GUI_H_SCALE 3
+
 #define AUDIO_SAMPLE_RATE 44100
 #define AUDIO_VOLUME 64 /* 0 -> 127 */
 
@@ -284,49 +287,56 @@ static void gui_exit_handler(void)
 
 
 
-int gui_init(int joystick_no, bool disable_audio)
+int gui_init(int joystick_no, bool disable_video, bool disable_audio)
 {
-#ifdef DISABLE_GUI
-  if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) != 0) {
-#else
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) != 0) {
-#endif /* DISABLE_GUI */
+  Uint32 flags;
+
+  flags = SDL_INIT_JOYSTICK;
+  if (! disable_video) {
+    flags |= SDL_INIT_VIDEO;
+  }
+  if (! disable_audio) {
+    flags |= SDL_INIT_AUDIO;
+  }
+
+  if (SDL_Init(flags) != 0) {
     fprintf(stderr, "Unable to initalize SDL: %s\n", SDL_GetError());
     return -1;
   }
   atexit(gui_exit_handler);
 
-#ifndef DISABLE_GUI
-  if ((gui_window = SDL_CreateWindow("lazyboNES",
-    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-    GUI_WIDTH, GUI_HEIGHT, 0)) == NULL) {
-    fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
-    return -1;
-  }
+  if (! disable_video) {
+    if ((gui_window = SDL_CreateWindow("lazyboNES",
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      GUI_WIDTH * GUI_W_SCALE, GUI_HEIGHT * GUI_H_SCALE, 0)) == NULL) {
+      fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
+      return -1;
+    }
 
-  if ((gui_renderer = SDL_CreateRenderer(gui_window, -1, 0)) == NULL) {
-    fprintf(stderr, "Unable to create renderer: %s\n", SDL_GetError());
-    return -1;
-  }
+    if ((gui_renderer = SDL_CreateRenderer(gui_window, -1, 0)) == NULL) {
+      fprintf(stderr, "Unable to create renderer: %s\n", SDL_GetError());
+      return -1;
+    }
 
-  if ((gui_texture = SDL_CreateTexture(gui_renderer, 
-    SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
-    GUI_WIDTH, GUI_HEIGHT)) == NULL) {
-    fprintf(stderr, "Unable to create texture: %s\n", SDL_GetError());
-    return -1;
-  }
+    if ((gui_texture = SDL_CreateTexture(gui_renderer, 
+      SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+      GUI_WIDTH * GUI_W_SCALE, GUI_HEIGHT * GUI_H_SCALE)) == NULL) {
+      fprintf(stderr, "Unable to create texture: %s\n", SDL_GetError());
+      return -1;
+    }
 
-  if (SDL_LockTexture(gui_texture, NULL,
-    (void **)&gui_pixels, &gui_pixel_pitch) != 0) {
-    fprintf(stderr, "Unable to lock texture: %s\n", SDL_GetError());
-    return -1;
-  }
+    if (SDL_LockTexture(gui_texture, NULL,
+      (void **)&gui_pixels, &gui_pixel_pitch) != 0) {
+      fprintf(stderr, "Unable to lock texture: %s\n", SDL_GetError());
+      return -1;
+    }
 
-  if ((gui_pixel_format = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888)) == NULL) {
-    fprintf(stderr, "Unable to create pixel format: %s\n", SDL_GetError());
-    return -1;
+    if ((gui_pixel_format = SDL_AllocFormat(
+      SDL_PIXELFORMAT_ARGB8888)) == NULL) {
+      fprintf(stderr, "Unable to create pixel format: %s\n", SDL_GetError());
+      return -1;
+    }
   }
-#endif /* DISABLE_GUI */
 
   if (SDL_NumJoysticks() > joystick_no) {
     gui_joystick = SDL_JoystickOpen(joystick_no);
@@ -344,16 +354,27 @@ int gui_init(int joystick_no, bool disable_audio)
 
 void gui_draw_scanline(uint16_t y, uint8_t colors[])
 {
-#ifndef DISABLE_GUI
   int x;
+  int scale_x, scale_y;
+  int out_x, out_y;
+
+  if (gui_renderer == NULL) {
+    return;
+  }
 
   for (x = 0; x < GUI_WIDTH; x++) {
-    gui_pixels[(y * GUI_WIDTH) + x] = SDL_MapRGB(gui_pixel_format, 
-      gui_sys_palette[colors[x] % 64][0],
-      gui_sys_palette[colors[x] % 64][1],
-      gui_sys_palette[colors[x] % 64][2]);
+    for (scale_y = 0; scale_y < GUI_H_SCALE; scale_y++) {
+      for (scale_x = 0; scale_x < GUI_W_SCALE; scale_x++) {
+        out_y = (y * GUI_H_SCALE) + scale_y;
+        out_x = (x * GUI_W_SCALE) + scale_x;
+        gui_pixels[(out_y * GUI_WIDTH * GUI_W_SCALE) + out_x] =
+          SDL_MapRGB(gui_pixel_format,
+          gui_sys_palette[colors[x] % 64][0],
+          gui_sys_palette[colors[x] % 64][1],
+          gui_sys_palette[colors[x] % 64][2]);
+      }
+    }
   }
-#endif /* DISABLE_GUI */
 }
 
 
@@ -396,7 +417,7 @@ void gui_update(void)
   while (SDL_PollEvent(&event) == 1) {
     switch (event.type) {
     case SDL_QUIT:
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
 
     /* Keyboard-based Controller */
@@ -483,7 +504,7 @@ void gui_update(void)
 
       case SDLK_q: /* Quit */
         if (event.type == SDL_KEYDOWN) {
-          exit(0);
+          exit(EXIT_SUCCESS);
         }
         break;
       }
@@ -576,7 +597,7 @@ void gui_update(void)
     if (SDL_LockTexture(gui_texture, NULL,
       (void **)&gui_pixels, &gui_pixel_pitch) != 0) {
       fprintf(stderr, "Unable to lock texture: %s\n", SDL_GetError());
-      exit(0);
+      exit(EXIT_FAILURE);
     }
   }
 

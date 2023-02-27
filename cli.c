@@ -96,6 +96,7 @@ static const int cli_color_map[2][UINT8_MAX + 1] = {
 
 
 
+static bool cli_active = false;
 static bool cli_enable_colors = false;
 static uint8_t cli_controller_state = 0;
 static uint16_t cli_button_timeout[8] = {0,0,0,0,0,0,0,0};
@@ -125,6 +126,10 @@ static void cli_winch_handler(void)
 
 void cli_pause(void)
 {
+  if (! cli_active) {
+    return;
+  }
+
   endwin();
   timeout(-1);
 }
@@ -133,6 +138,10 @@ void cli_pause(void)
 
 void cli_resume(void)
 {
+  if (! cli_active) {
+    return;
+  }
+
   timeout(0);
   refresh();
 }
@@ -141,16 +150,17 @@ void cli_resume(void)
 
 int cli_init(bool enable_colors)
 {
-  cli_enable_colors = enable_colors;
-#ifndef DISABLE_CLI
   int maxy, maxx;
+
+  cli_active = true;
+  cli_enable_colors = enable_colors;
 
   initscr();
 
   getmaxyx(stdscr, maxy, maxx);
   if (maxx < CLI_WIDTH || maxy < CLI_HEIGHT) {
     endwin();
-    fprintf(stderr, "\nConsole window must at least %dx%d.\n",
+    fprintf(stderr, "\nConsole window must be at least %dx%d.\n",
       CLI_WIDTH, CLI_HEIGHT);
     return -1;
   }
@@ -171,7 +181,6 @@ int cli_init(bool enable_colors)
     init_pair(7, COLOR_WHITE,   COLOR_BLACK);
   }
 
-#endif /* DISABLE_CLI */
   return 0;
 }
 
@@ -179,6 +188,9 @@ int cli_init(bool enable_colors)
 
 void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile)
 {
+  if (! cli_active) {
+    return;
+  }
   if (x >= CLI_WIDTH) {
     return;
   }
@@ -215,8 +227,11 @@ void cli_update(mem_t *mem, ppu_t *ppu, apu_t* apu)
 void cli_update(void)
 #endif
 {
-#ifndef DISABLE_CLI
   int c, i;
+
+  if (! cli_active) {
+    return;
+  }
 
   for (i = 0; i < 8; i++) {
     if (cli_button_timeout[i] > 0) {
@@ -348,7 +363,7 @@ cli_update_freeze:
 
     case 'Q':
     case 'q':
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
 
     default:
@@ -359,7 +374,6 @@ cli_update_freeze:
   if (cli_freeze) {
     goto cli_update_freeze;
   }
-#endif /* DISABLE_CLI */
 }
 
 
