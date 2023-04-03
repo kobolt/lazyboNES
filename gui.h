@@ -13,5 +13,7 @@ void gui_audio_noise_update(uint16_t freq, uint8_t volume);
 void gui_update(void);
 bool gui_save_state_requested(void);
 bool gui_load_state_requested(void);
+void gui_warp_mode_set(bool value);
+bool gui_warp_mode_get(void);
 
 #endif /* _GUI_H */

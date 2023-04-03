@@ -446,7 +446,9 @@ void ppu_execute(ppu_t *ppu)
     ppu_draw_sprites(ppu, pixels, 0);
     gui_draw_scanline(ppu->scanline, pixels);
 
-  } else if (ppu->scanline == 241 && ppu->dot == 1) {
+  } else if (ppu->scanline == 243 && ppu->dot == 1) {
+    /* Hack: This should actually happen on scanline 241, but moved to 243 to 
+       avoid the 2 lowest scanlines of the status getting scrolled in SMB2. */
     ppu->vblank = 1;
 
     if (ppu->nmi_enable) {

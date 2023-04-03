@@ -13,6 +13,7 @@
 #include "ines.h"
 #include "ppu.h"
 #include "apu.h"
+#include "fds.h"
 #include "gui.h"
 #include "cli.h"
 #include "tas.h"
@@ -23,6 +24,7 @@ static cpu_t main_cpu;
 static mem_t main_mem;
 static ppu_t main_ppu;
 static apu_t main_apu;
+static fds_t main_fds;
 
 static bool debugger_break = false;
 static bool nmi_break = false;
@@ -32,19 +34,9 @@ static cpu_t save_cpu;
 static mem_t save_mem;
 static ppu_t save_ppu;
 static apu_t save_apu;
+static fds_t save_fds;
 
-
-
-static void crash_dump(void)
-{ 
-#ifdef CPU_TRACE
-  fprintf(stderr, "CPU Trace:\n");
-  cpu_trace_dump(stderr);
-#endif
-
-  fprintf(stderr, "\nPPU Dump:\n");
-  ppu_dump(stderr, &main_ppu);
-}
+extern bool gui_warp;
 
 
 
@@ -73,12 +65,14 @@ static bool debugger(void)
       fprintf(stdout, "  c - Continue\n");
       fprintf(stdout, "  n - Continue until next NMI\n");
       fprintf(stdout, "  s - Step\n");
+      fprintf(stdout, "  w - Warp mode toggle\n");
       fprintf(stdout, "  1 - Dump CPU Trace\n");
       fprintf(stdout, "  2 - Dump ZP/Stack/Vectors\n");
       fprintf(stdout, "  3 - Dump PPU NT/AT/RAM\n");
       fprintf(stdout, "  4 - Dump PPU Pattern Tables\n");
       fprintf(stdout, "  5 - Dump APU\n");
       fprintf(stdout, "  6 - Dump other RAM\n");
+      fprintf(stdout, "  7 - Dump FDS\n");
       break;
 
     case 'c': /* Continue */
@@ -91,17 +85,23 @@ static bool debugger(void)
       nmi_break = true;
       return false;
 
+    case 'w':
+      if (gui_warp_mode_get()) {
+        gui_warp_mode_set(false);
+        fprintf(stdout, "Warp mode disabled.\n");
+      } else {
+        gui_warp_mode_set(true);
+        fprintf(stdout, "Warp mode enabled.\n");
+      }
+      break;
+
     case 'q': /* Quit */
       exit(EXIT_SUCCESS);
       break;
 
     case '1':
-#ifdef CPU_TRACE
       fprintf(stdout, "CPU Trace:\n");
       cpu_trace_dump(stdout);
-#else
-      fprintf(stdout, "CPU trace not compiled in!\n");
-#endif
       break;
 
     case '2':
@@ -148,6 +148,10 @@ static bool debugger(void)
       mem_dump(stdout, &main_mem, 0x200, 0x7FF);
       break;
 
+    case '7':
+      fds_dump(stdout, &main_fds);
+      break;
+
     default:
       continue;
     }
@@ -174,8 +178,7 @@ void panic(const char *format, ...)
   vfprintf(stderr, format, args);
   va_end(args);
 
-  crash_dump();
-  exit(EXIT_FAILURE);
+  debugger_break = true;
 }
 
 
@@ -199,6 +202,7 @@ static void display_help(const char *progname)
     "  -c        Disable terminal colors.\n"
     "  -j NO     Use SDL joystick NO instead of 0.\n"
     "  -t FILE   Use FM2 FILE as input for TAS.\n"
+    "  -f FILE   Enable Famicom Disk System and use FILE as FDS BIOS.\n"
     "\n");
 }
 
@@ -209,13 +213,14 @@ int main(int argc, char *argv[])
   int c;
   char *rom_filename = NULL;
   char *tas_filename = NULL;
+  char *fds_bios_filename = NULL;
   bool disable_video = false;
   bool disable_audio = false;
   bool disable_terminal = false;
   bool enable_colors = true;
   int joystick_no = 0;
 
-  while ((c = getopt(argc, argv, "hdvakcj:t:")) != -1) {
+  while ((c = getopt(argc, argv, "hdvakcj:t:f:")) != -1) {
     switch (c) {
     case 'h':
       display_help(argv[0]);
@@ -249,6 +254,10 @@ int main(int argc, char *argv[])
       tas_filename = optarg;
       break;
 
+    case 'f':
+      fds_bios_filename = optarg;
+      break;
+
     case '?':
     default:
       display_help(argv[0]);
@@ -270,9 +279,24 @@ int main(int argc, char *argv[])
   ppu_init(&main_ppu, &main_mem);
   apu_init(&main_apu, &main_mem);
 
-  if (ines_load(rom_filename, &main_mem, &main_ppu) != 0) {
-    fprintf(stderr, "Unable to load ROM: %s\n", argv[1]);
-    return EXIT_FAILURE;
+  if (fds_bios_filename != NULL) {
+    /* Famicom Disk System */
+    fds_init(&main_fds, &main_mem, &main_ppu);
+    if (fds_bios_load(fds_bios_filename, &main_mem) != 0) {
+      fprintf(stderr, "Unable to load FDS BIOS: %s\n", fds_bios_filename);
+      return EXIT_FAILURE;
+    }
+    if (fds_image_load(rom_filename, &main_fds) != 0) {
+      fprintf(stderr, "Unable to load FDS image: %s\n", rom_filename);
+      return EXIT_FAILURE;
+    }
+
+  } else {
+    /* Regular ROM */
+    if (ines_load(rom_filename, &main_mem, &main_ppu) != 0) {
+      fprintf(stderr, "Unable to load ROM: %s\n", rom_filename);
+      return EXIT_FAILURE;
+    }
   }
 
   if (tas_filename != NULL) {
@@ -296,9 +320,7 @@ int main(int argc, char *argv[])
 
   cpu_reset(&main_cpu, &main_mem);
   while (1) {
-#ifdef CPU_TRACE
     cpu_trace_add(&main_cpu, &main_mem);
-#endif
 
     /* Let the PPU execute for 2 frames before the CPU starts. */
     if (main_ppu.frame_no < 2) {
@@ -312,10 +334,17 @@ int main(int argc, char *argv[])
       ppu_execute(&main_ppu);
       ppu_execute(&main_ppu);
       ppu_execute(&main_ppu);
+      fds_execute(&main_fds);
       main_cpu.cycles--;
     }
 
     apu_execute(&main_apu);
+
+    /* Trigger pending IRQ from FDS once CPU is ready. */
+    if (main_fds.trigger_irq && (main_cpu.sr.i == false)) {
+      cpu_irq(&main_cpu, &main_mem);
+      main_fds.trigger_irq = false;
+    }
 
     /* Check for vertical blank NMI from PPU. */
     if (main_ppu.trigger_nmi) {
@@ -339,12 +368,14 @@ int main(int argc, char *argv[])
         memcpy(&save_mem, &main_mem, sizeof(mem_t));
         memcpy(&save_ppu, &main_ppu, sizeof(ppu_t));
         memcpy(&save_apu, &main_apu, sizeof(apu_t));
+        memcpy(&save_fds, &main_fds, sizeof(fds_t));
         saved_state = true;
       } else if (gui_load_state_requested() && saved_state) {
         memcpy(&main_cpu, &save_cpu, sizeof(cpu_t));
         memcpy(&main_mem, &save_mem, sizeof(mem_t));
         memcpy(&main_ppu, &save_ppu, sizeof(ppu_t));
         memcpy(&main_apu, &save_apu, sizeof(apu_t));
+        memcpy(&main_fds, &save_fds, sizeof(fds_t));
       }
     }
 

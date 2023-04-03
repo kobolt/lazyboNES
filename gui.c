@@ -28,6 +28,7 @@ static Uint32 gui_ticks = 0;
 static uint8_t gui_controller_state = 0;
 static bool gui_save_state_request = false;
 static bool gui_load_state_request = false;
+static bool gui_warp_mode = false;
 
 static const uint8_t gui_sys_palette[64][3] =
 {
@@ -398,6 +399,20 @@ bool gui_save_state_requested(void)
 
 
 
+void gui_warp_mode_set(bool value)
+{
+  gui_warp_mode = value;
+}
+
+
+
+bool gui_warp_mode_get(void)
+{
+  return gui_warp_mode;
+}
+
+
+
 bool gui_load_state_requested(void)
 {
   if (gui_load_state_request) {
@@ -601,9 +616,11 @@ void gui_update(void)
     }
   }
 
-  /* Force 60 Hz (NTSC) */
-  while ((SDL_GetTicks() - gui_ticks) < 16) {
-    SDL_Delay(1);
+  if (! gui_warp_mode) {
+    /* Force 60 Hz (NTSC) */
+    while ((SDL_GetTicks() - gui_ticks) < 16) {
+      SDL_Delay(1);
+    }
   }
 
   if (gui_renderer != NULL) {

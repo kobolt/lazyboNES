@@ -31,6 +31,7 @@ void cpu_reset(cpu_t *cpu, mem_t *mem);
 void cpu_execute(cpu_t *cpu, mem_t *mem);
 void cpu_trap_opcode(uint8_t opcode, cpu_opcode_handler_t handler);
 void cpu_nmi(cpu_t *cpu, mem_t *mem);
+void cpu_irq(cpu_t *cpu, mem_t *mem);
 
 void cpu_trace_init(void);
 void cpu_trace_add(cpu_t *cpu, mem_t *mem);

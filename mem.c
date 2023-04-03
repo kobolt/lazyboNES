@@ -26,8 +26,11 @@ void mem_init(mem_t *mem)
   mem->ppu_write = NULL;
   mem->apu_read  = NULL;
   mem->apu_write = NULL;
+  mem->fds_read  = NULL;
+  mem->fds_write = NULL;
   mem->ppu = NULL;
   mem->apu = NULL;
+  mem->fds = NULL;
 }
 
 
@@ -38,13 +41,25 @@ uint8_t mem_read(mem_t *mem, uint16_t address)
     return mem->ram[address];
 
   } else if (address <= 0x0FFF) {
-    return mem->ram[address - 0x800]; /* Mirror */
+    if (mem->fds_read != NULL && mem->fds != NULL) {
+      return (mem->fds_read)(mem->fds, address);
+    } else {
+      return mem->ram[address - 0x800]; /* Mirror */
+    }
 
   } else if (address <= 0x17FF) {
-    return mem->ram[address - 0x1000]; /* Mirror */
+    if (mem->fds_read != NULL && mem->fds != NULL) {
+      return (mem->fds_read)(mem->fds, address);
+    } else {
+      return mem->ram[address - 0x1000]; /* Mirror */
+    }
 
   } else if (address <= 0x1FFF) {
-    return mem->ram[address - 0x1800]; /* Mirror */
+    if (mem->fds_read != NULL && mem->fds != NULL) {
+      return (mem->fds_read)(mem->fds, address);
+    } else {
+      return mem->ram[address - 0x1800]; /* Mirror */
+    }
 
   } else if (address <= 0x3FFF) {
     if (mem->ppu_read != NULL && mem->ppu != NULL) {
@@ -60,6 +75,9 @@ uint8_t mem_read(mem_t *mem, uint16_t address)
       panic("APU read hook not installed! Address: 0x%04x\n", address);
     }
 
+  } else if (address <= 0x403F && mem->fds_read != NULL && mem->fds != NULL) {
+    return (mem->fds_read)(mem->fds, address);
+
   }
 
   return mem->cart[address - 0x4020];
@@ -73,13 +91,25 @@ void mem_write(mem_t *mem, uint16_t address, uint8_t value)
     mem->ram[address] = value;
 
   } else if (address <= 0x0FFF) {
-    mem->ram[address - 0x800] = value; /* Mirror */
+    if (mem->fds_write != NULL && mem->fds != NULL) {
+      (mem->fds_write)(mem->fds, address, value);
+    } else {
+      mem->ram[address - 0x800] = value; /* Mirror */
+    }
 
   } else if (address <= 0x17FF) {
-    mem->ram[address - 0x1000] = value; /* Mirror */
+    if (mem->fds_write != NULL && mem->fds != NULL) {
+      (mem->fds_write)(mem->fds, address, value);
+    } else {
+      mem->ram[address - 0x1000] = value; /* Mirror */
+    }
 
   } else if (address <= 0x1FFF) {
-    mem->ram[address - 0x1800] = value; /* Mirror */
+    if (mem->fds_write != NULL && mem->fds != NULL) {
+      (mem->fds_write)(mem->fds, address, value);
+    } else {
+      mem->ram[address - 0x1800] = value; /* Mirror */
+    }
 
   } else if (address <= 0x3FFF) {
     if (mem->ppu_write != NULL && mem->ppu != NULL) {
@@ -104,6 +134,9 @@ void mem_write(mem_t *mem, uint16_t address, uint8_t value)
     } else {
       panic("APU write hook not installed! Address: 0x%04x\n", address);
     }
+
+  } else if (address <= 0x403F && mem->fds_write != NULL && mem->fds != NULL) {
+    (mem->fds_write)(mem->fds, address, value);
   
   } else {
     mem->cart[address - 0x4020] = value;

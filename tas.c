@@ -7,7 +7,7 @@
 
 
 
-#define TAS_DATA_MAX 32768
+#define TAS_DATA_MAX 131072
 
 
 
@@ -23,7 +23,7 @@ int tas_init(const char *filename)
   FILE *fh;
   char buffer[32];
   uint8_t controller_state;
-  char r, l, d, u, t, s, b, a;
+  char cmd, r, l, d, u, t, s, b, a;
 
   fh = fopen(filename, "r");
   if (fh == NULL) {
@@ -36,10 +36,10 @@ int tas_init(const char *filename)
   n = 0;
   while (fgets(buffer, sizeof(buffer), fh) != NULL) {
     /* Simple parsing of the FM2 format. */
-    result = sscanf(buffer, "|0|%c%c%c%c%c%c%c%c|||\n",
-      &r, &l, &d, &u, &t, &s, &b, &a);
+    result = sscanf(buffer, "|%c|%c%c%c%c%c%c%c%c|||\n",
+      &cmd, &r, &l, &d, &u, &t, &s, &b, &a);
 
-    if (result == 8) {
+    if (result == 9) {
       controller_state = 0;
       if (r == 'R') controller_state += 0x80;
       if (l == 'L') controller_state += 0x40;

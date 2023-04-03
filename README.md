@@ -12,8 +12,9 @@ Some features:
 * Ctrl+C in the terminal breaks into a debugger for dumping data.
 * Uses the 8 standard ANSI colors, or monochrome if selected.
 * Accepts TAS input in the FM2 format.
+* Famicom Disk System (FDS) support to load Super Mario Bros 2.
 
-Screenshot:
+Screenshot from SMB1:
 ```
 
    MARIO          WORLD  TIME
@@ -46,6 +47,39 @@ Screenshot:
 ################################
 ```
 
+Screenshot from SMB2:
+```
+
+   MARIO          WORLD  TIME
+   000000  $x00    1-1
+
+     /\|||\/||\
+  /\ \\|||/|-|<
+ /   \/\/| \|||
+ \--
+     /v\/\|\|/\ |\|\/\/\  /\
+     |||||||||| ||||||||  ||
+     ||||||<||| |<|<||\\   /
+     |||||||||| ||||||||  /
+     ||||||||\/ |/||\/\/. ||
+
+               c1986 NINTENDO
+  %%%%%%
+  %%%%%%
+  % %% %   * MARIO GAME
+  % %% %
+%%%%%%%%%%   LUIGI GAME   /\
+%%%%%%%%%%                ||
+%%%%  %%%%            /\  ||
+%%%%  %%%% TOP- 000000\/  \/
+%%%% @@%%%            ||  ||----
+%%%% @@%%%            ||  ||----
+################################
+################################
+################################
+################################
+```
+
 Information on my blog:
 * [lazyboNES Emulator](https://kobolt.github.io/article-194.html)
 * [lazyboNES Emulator TAS Support](https://kobolt.github.io/article-206.html)
@@ -53,4 +87,5 @@ Information on my blog:
 YouTube videos:
 * [Text-mode Super Mario Bros](https://www.youtube.com/shorts/0doygelPMto)
 * [SMB 4:54.032 TAS](https://www.youtube.com/watch?v=kDsrsHwDWrY)
+* [Super Mario Bros 2 (Famicom Disk System)](https://www.youtube.com/watch?v=EG1NTZ5mrTo)
 

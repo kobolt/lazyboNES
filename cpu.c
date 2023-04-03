@@ -2737,3 +2737,18 @@ void cpu_nmi(cpu_t *cpu, mem_t *mem)
 
 
 
+void cpu_irq(cpu_t *cpu, mem_t *mem)
+{
+  if (cpu->sr.i == 1) {
+    return; /* Masked. */
+  }
+  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu->pc / 256);
+  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu->pc % 256);
+  mem_write(mem, MEM_PAGE_STACK + cpu->sp--, cpu_status_get(cpu, 0));
+  cpu->sr.i = 1;
+  cpu->pc  = mem_read(mem, MEM_VECTOR_IRQ_LOW);
+  cpu->pc += mem_read(mem, MEM_VECTOR_IRQ_HIGH) * 256;
+}
+
+
+

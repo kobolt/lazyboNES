@@ -18,8 +18,11 @@ typedef struct mem_s {
   mem_write_hook_t ppu_write;
   mem_read_hook_t  apu_read;
   mem_write_hook_t apu_write;
+  mem_read_hook_t  fds_read;
+  mem_write_hook_t fds_write;
   void *ppu;
   void *apu;
+  void *fds;
 } mem_t;
 
 #define MEM_PAGE_STACK 0x100

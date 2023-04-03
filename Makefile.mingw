@@ -3,12 +3,13 @@
 # mingw32-make.exe -f %PDCURSES_SRCDIR%/wincon/Makefile
 # mingw32-make.exe -f Makefile.mingw
 
-CFLAGS=-Wall -Wextra -lSDL2 -lm -I../PDCurses-3.9 -I../SDL2-2.0.20/i686-w64-mingw32/include -L../SDL2-2.0.20/i686-w64-mingw32/lib -DF32_AUDIO
+CFLAGS=-Wall -Wextra -I../PDCurses-3.9 -I../SDL2-2.0.20/i686-w64-mingw32/include -DF32_AUDIO
+LDFLAGS=-lSDL2 -lm -L../SDL2-2.0.20/i686-w64-mingw32/lib
 
 all: lazyboNES
 
-lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o gui.o cli.o tas.o pdcurses.a
-	gcc -o lazyboNES $^ ${CFLAGS}
+lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o fds.o gui.o cli.o tas.o pdcurses.a
+	gcc -o lazyboNES $^ ${LDFLAGS}
 
 main.o: main.c
 	gcc -c $^ ${CFLAGS}
@@ -26,6 +27,9 @@ ppu.o: ppu.c
 	gcc -c $^ ${CFLAGS}
 
 apu.o: apu.c
+	gcc -c $^ ${CFLAGS}
+
+fds.o: fds.c
 	gcc -c $^ ${CFLAGS}
 
 gui.o: gui.c
