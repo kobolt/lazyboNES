@@ -83,6 +83,7 @@ Screenshot from SMB2:
 Information on my blog:
 * [lazyboNES Emulator](https://kobolt.github.io/article-194.html)
 * [lazyboNES Emulator TAS Support](https://kobolt.github.io/article-206.html)
+* [lazyboNES Emulator FDS Support](https://kobolt.github.io/article-216.html)
 
 YouTube videos:
 * [Text-mode Super Mario Bros](https://www.youtube.com/shorts/0doygelPMto)
