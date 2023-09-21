@@ -43,5 +43,5 @@ tas.o: tas.c
 
 .PHONY: clean
 clean:
-	rm -f *.o lazyboNES
+	del *.o lazyboNES
 
