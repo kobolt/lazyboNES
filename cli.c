@@ -20,6 +20,7 @@
 
 
 
+/* ASCII character to use for each tile: */
 static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
 {
   '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
@@ -57,6 +58,7 @@ static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 }};
 
+/* Color to use for tile in 8/16 color mode: */
 static const int cli_color_map[2][UINT8_MAX + 1] = {
 {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -93,6 +95,74 @@ static const int cli_color_map[2][UINT8_MAX + 1] = {
   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
 }};
+
+/* Color mapping in 256 color mode, from the default rxvt color palette: */
+static const uint8_t cli_sys_palette[64] =
+{
+  242,  20,  21,  56,  54,  88,  52,  52,  22,  22,  22,  22,  18,  16, 16, 16,
+  246,  26,  27,  98, 128, 162, 130,  94,  64,  28,  28,  28,  25,  16, 16, 16,
+  255,  33,  63, 134, 206, 204, 202, 208, 112, 118, 118,  84, 255, 240, 16, 16,
+  255, 117, 105, 182, 212, 218, 217, 215, 185, 154, 156, 120, 255, 250, 16, 16,
+};
+
+/* Foreground color number to use for tile in 256 color mode: */
+static const int cli_fg_palette_map[2][UINT8_MAX + 1] = {
+{
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+},{
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+}};
+
+/* Background color number to use for background tile in 256 color mode: */
+static const int cli_bg_palette_map[UINT8_MAX + 1] =
+{
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 3, 0, 3, 0, 0, 0, 3, 3, 3, 3, 3,
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 3, 0,
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+  3, 3, 3, 3, 3, 0, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0,
+  0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0,
+  0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0,
+  0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 
 
@@ -150,7 +220,10 @@ void cli_resume(void)
 
 int cli_init(bool enable_colors)
 {
-  int maxy, maxx;
+  int maxy;
+  int maxx;
+  int fg;
+  int bg;
 
   cli_active = true;
   cli_enable_colors = enable_colors;
@@ -172,13 +245,26 @@ int cli_init(bool enable_colors)
 
   if (cli_enable_colors && has_colors()) {
     start_color();
-    init_pair(1, COLOR_RED,     COLOR_BLACK);
-    init_pair(2, COLOR_GREEN,   COLOR_BLACK);
-    init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
-    init_pair(4, COLOR_BLUE,    COLOR_BLACK);
-    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(6, COLOR_CYAN,    COLOR_BLACK);
-    init_pair(7, COLOR_WHITE,   COLOR_BLACK);
+
+    if (COLOR_PAIRS >= 4096) {
+      /* 256 Color Mode */
+      use_default_colors();
+      for (bg = 0; bg < 64; bg++) {
+        for (fg = 0; fg < 64; fg++) {
+          init_pair((bg * 64) + fg + 1,
+            cli_sys_palette[fg], cli_sys_palette[bg]);
+        }
+      }
+    } else {
+      /* 8 Color Mode */
+      init_pair(1, COLOR_RED,     COLOR_BLACK);
+      init_pair(2, COLOR_GREEN,   COLOR_BLACK);
+      init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
+      init_pair(4, COLOR_BLUE,    COLOR_BLACK);
+      init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+      init_pair(6, COLOR_CYAN,    COLOR_BLACK);
+      init_pair(7, COLOR_WHITE,   COLOR_BLACK);
+    }
   }
 
   return 0;
@@ -186,7 +272,12 @@ int cli_init(bool enable_colors)
 
 
 
-void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile)
+void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
+  uint8_t color_backdrop,
+  uint8_t color_1,
+  uint8_t color_2,
+  uint8_t color_3,
+  uint8_t color_4)
 {
   if (! cli_active) {
     return;
@@ -199,15 +290,79 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile)
   }
 
   chtype ch = cli_tile_map[table_no][tile];
-  int color_pair = cli_color_map[table_no][tile];
 
-  if (! (table_no == 0 && ch == ' ')) {
+  if ((table_no == 0 && ch == ' ')) {
+    return; /* Do not draw transparent part of sprites. */
+  }
+
+  if (COLOR_PAIRS >= 4096) {
+    /* 256 Color Mode */
+    int fg;
+    int bg;
+
+    switch (cli_fg_palette_map[table_no][tile]) {
+    case 1:
+      fg = color_1;
+      break;
+    case 2:
+      fg = color_2;
+      break;
+    case 3:
+      fg = color_3;
+      break;
+    case 4:
+      fg = color_4;
+      break;
+    case 0:
+    default:
+      fg = color_backdrop;
+      break;
+    }
+
+    if (table_no == 0) {
+      bg = color_backdrop;
+    } else {
+      switch (cli_bg_palette_map[tile]) {
+      case 1:
+        bg = color_1;
+        break;
+      case 2:
+        bg = color_2;
+        break;
+      case 3:
+        bg = color_3;
+        break;
+      case 4:
+        bg = color_4;
+        break;
+      case 0:
+      default:
+        bg = color_backdrop;
+        break;
+      }
+    }
+
+    short color_pair = (bg * 64) + fg + 1;
+    attr_set(table_no == 0 ? A_BOLD : A_NORMAL, color_pair, NULL);
+    mvaddch(y, x, ch);
+    attr_set(A_NORMAL, 0, NULL);
+
+  } else {
+    /* 8/16 Color Mode or Monochrome */
+    int color_pair = cli_color_map[table_no][tile];
+
+    if (table_no == 0) {
+      attron(A_BOLD);
+    }
     if (cli_enable_colors && has_colors()) {
       attron(COLOR_PAIR(color_pair));
     }
     mvaddch(y, x, ch);
     if (cli_enable_colors && has_colors()) {
       attroff(COLOR_PAIR(color_pair));
+    }
+    if (table_no == 0) {
+      attroff(A_BOLD);
     }
   }
 }

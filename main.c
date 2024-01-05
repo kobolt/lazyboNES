@@ -36,8 +36,6 @@ static ppu_t save_ppu;
 static apu_t save_apu;
 static fds_t save_fds;
 
-extern bool gui_warp;
-
 
 
 static bool debugger(void)

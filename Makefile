@@ -1,5 +1,5 @@
 CFLAGS=-Wall -Wextra
-LDFLAGS=-lSDL2 -lm -lncurses
+LDFLAGS=-lSDL2 -lm -lncursesw
 
 all: lazyboNES
 

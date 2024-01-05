@@ -10,7 +10,7 @@ Some features:
 * APU (audio) emulation supports pulse/triangle/noise channels, but not DMC.
 * Save/Load state supported but only one slot and only in memory.
 * Ctrl+C in the terminal breaks into a debugger for dumping data.
-* Uses the 8 standard ANSI colors, or monochrome if selected.
+* Monochrome, 8 ANSI colors or 256 color support, depending on terminal.
 * Accepts TAS input in the FM2 format.
 * Famicom Disk System (FDS) support to load Super Mario Bros 2.
 
@@ -89,4 +89,5 @@ YouTube videos:
 * [Text-mode Super Mario Bros](https://www.youtube.com/shorts/0doygelPMto)
 * [SMB 4:54.032 TAS](https://www.youtube.com/watch?v=kDsrsHwDWrY)
 * [Super Mario Bros 2 (Famicom Disk System)](https://www.youtube.com/watch?v=EG1NTZ5mrTo)
+* [256-color terminal mode](https://www.youtube.com/watch?v=1N4DXhKInMk)
 

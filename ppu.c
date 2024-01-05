@@ -306,10 +306,6 @@ static void ppu_draw_background(ppu_t *ppu, uint8_t pixels[])
     nt = ppu->name_table[nt_offset + htile + (vtile * 32)];
     at = ppu->name_table[nt_offset + 0x3C0 + (htile / 4) + ((vtile / 4) * 8)];
 
-    if (ppu->scanline % 8 == 0) {
-      cli_draw_tile(vtile, base_htile, ppu->bg_tile_sel, nt);
-    }
-
     if (((htile % 4) <= 1) && ((vtile % 4) <= 1)) {
       palette_group = at & 0x3;
     } else if (((htile % 4) >= 2) && ((vtile % 4) <= 1)) {
@@ -318,6 +314,15 @@ static void ppu_draw_background(ppu_t *ppu, uint8_t pixels[])
       palette_group = (at >> 4) & 0x3;
     } else {
       palette_group = (at >> 6) & 0x3;
+    }
+
+    if (ppu->scanline % 8 == 0) {
+      cli_draw_tile(vtile, base_htile, ppu->bg_tile_sel, nt,
+        ppu->palette_ram[0],
+        ppu->palette_ram[(palette_group * 4)],
+        ppu->palette_ram[(palette_group * 4) + 1],
+        ppu->palette_ram[(palette_group * 4) + 2],
+        ppu->palette_ram[(palette_group * 4) + 3]);
     }
 
     plane1 = ppu->pattern_table[ppu->bg_tile_sel]
@@ -364,11 +369,17 @@ static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[], int prio)
       }
 
       nt = ppu->sprite_ram[sprite+1];
+      palette_group = (ppu->sprite_ram[sprite+2] & 0x3) + 4;
 
       if (ppu->scanline % 8 == 0) {
         cli_draw_tile(ppu->sprite_ram[sprite] / 8,
                      (ppu->sprite_ram[sprite+3] + 4) / 8,
-                      ppu->sprite_tile_sel, nt);
+                      ppu->sprite_tile_sel, nt,
+                      ppu->palette_ram[0],
+                      ppu->palette_ram[(palette_group * 4)],
+                      ppu->palette_ram[(palette_group * 4) + 1],
+                      ppu->palette_ram[(palette_group * 4) + 2],
+                      ppu->palette_ram[(palette_group * 4) + 3]);
       }
 
       if ((ppu->sprite_ram[sprite+2] >> 7) & 0x1) { /* Flip vertically. */
@@ -376,7 +387,6 @@ static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[], int prio)
       } else { /* Do not flip vertically. */
         y_offset = ppu->scanline - ppu->sprite_ram[sprite] - 1;
       }
-      palette_group = (ppu->sprite_ram[sprite+2] & 0x3) + 4;
 
       plane1 = ppu->pattern_table[ppu->sprite_tile_sel]
         [(nt << 4) + (y_offset % 8)];

@@ -11,7 +11,12 @@
 #endif
 
 int cli_init(bool enable_colors);
-void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile);
+void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
+  uint8_t color_backdrop,
+  uint8_t color_1,
+  uint8_t color_2,
+  uint8_t color_3,
+  uint8_t color_4);
 uint8_t cli_get_controller_state(void);
 #ifdef EXTRA_INFO
 void cli_update(mem_t *mem, ppu_t *ppu, apu_t* apu);
