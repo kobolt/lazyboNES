@@ -471,9 +471,19 @@ void apu_execute(apu_t *apu)
         }
         gui_audio_square_update(i, 
           1789773 / (16 * (apu->pulse_timer[i] + 1)), volume);
+#ifdef SPECIAL_TERMINAL
+        if (i == 1) {
+          cli_audio_update(1789773 / (16 * (apu->pulse_timer[1] + 1)), volume);
+        }
+#endif
 
       } else {
         gui_audio_square_update(i, 0, 0);
+#ifdef SPECIAL_TERMINAL
+        if (i == 1) {
+          cli_audio_update(0, 0);
+        }
+#endif
       }
     }
 

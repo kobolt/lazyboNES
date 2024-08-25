@@ -168,10 +168,14 @@ static const int cli_bg_palette_map[UINT8_MAX + 1] =
 
 static bool cli_active = false;
 static bool cli_enable_colors = false;
+static int cli_maxx;
+static int cli_maxy;
 static uint8_t cli_controller_state = 0;
+#ifndef SPECIAL_TERMINAL
 static uint16_t cli_button_timeout[8] = {0,0,0,0,0,0,0,0};
 static const uint8_t cli_button_map[8] = 
   {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+#endif
 
 static bool cli_freeze = false;
 static bool cli_freeze_step = false;
@@ -180,6 +184,9 @@ static bool cli_freeze_step = false;
 
 static void cli_exit_handler(void)
 {
+#ifdef SPECIAL_TERMINAL
+  fprintf(stderr, "\e[x"); /* Silence */
+#endif
   endwin();
 }
 
@@ -220,8 +227,6 @@ void cli_resume(void)
 
 int cli_init(bool enable_colors)
 {
-  int maxy;
-  int maxx;
   int fg;
   int bg;
 
@@ -229,15 +234,7 @@ int cli_init(bool enable_colors)
   cli_enable_colors = enable_colors;
 
   initscr();
-
-  getmaxyx(stdscr, maxy, maxx);
-  if (maxx < CLI_WIDTH || maxy < CLI_HEIGHT) {
-    endwin();
-    fprintf(stderr, "\nConsole window must be at least %dx%d.\n",
-      CLI_WIDTH, CLI_HEIGHT);
-    return -1;
-  }
-
+  getmaxyx(stdscr, cli_maxy, cli_maxx);
   atexit(cli_exit_handler);
   noecho();
   keypad(stdscr, TRUE);
@@ -287,6 +284,15 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
   }
   if (y >= CLI_HEIGHT) {
     return;
+  }
+
+  /* Crop from top if screen height is reduced: */
+  if (cli_maxy < 25) {
+    y -= 3;
+  } else if (cli_maxy < 26) {
+    y -= 2;
+  } else if (cli_maxy < 27) {
+    y -= 1;
   }
 
   chtype ch = cli_tile_map[table_no][tile];
@@ -376,25 +382,41 @@ uint8_t cli_get_controller_state(void)
 
 
 
+#ifdef SPECIAL_TERMINAL
+void cli_audio_update(uint16_t freq, uint8_t volume)
+{
+  /* Send special custom CSI codes with stderr to bypass curses. */
+  if (volume > 0) {
+    fprintf(stderr, "\e[%dx", freq);
+  } else {
+    fprintf(stderr, "\e[x"); /* Silence */
+  }
+}
+#endif
+
+
+
 #ifdef EXTRA_INFO
 void cli_update(mem_t *mem, ppu_t *ppu, apu_t* apu)
 #else
 void cli_update(void)
 #endif
 {
-  int c, i;
+  int c;
 
   if (! cli_active) {
     return;
   }
 
-  for (i = 0; i < 8; i++) {
+#ifndef SPECIAL_TERMINAL
+  for (int i = 0; i < 8; i++) {
     if (cli_button_timeout[i] > 0) {
       cli_button_timeout[i]--;
     } else {
       cli_controller_state &= ~cli_button_map[i];
     }
   }
+#endif
 
 #ifdef EXTRA_INFO
   static uint32_t frame_start = 0;
@@ -454,6 +476,7 @@ void cli_update(void)
   }
 cli_update_freeze:
   refresh();
+  getmaxyx(stdscr, cli_maxy, cli_maxx);
 
   while ((c = getch()) != ERR) {
     switch (c) {
@@ -462,6 +485,76 @@ cli_update_freeze:
       cli_winch_handler();
       break;
 
+#ifdef SPECIAL_TERMINAL /* Separate key press and key release events. */
+    case 'h': /* Press A */
+    case ',':
+      cli_controller_state |= 0x1;
+      break;
+
+    case 'j': /* Press B */
+    case '0':
+      cli_controller_state |= 0x2;
+      break;
+
+    case 'k': /* Press Select */
+      cli_controller_state |= 0x4;
+      break;
+
+    case 'l': /* Press Start */
+      cli_controller_state |= 0x8;
+      break;
+
+    case 'w': /* Press Up */
+      cli_controller_state |= 0x10;
+      break;
+
+    case 's': /* Press Down */
+      cli_controller_state |= 0x20;
+      break;
+
+    case 'a': /* Press Left */
+      cli_controller_state |= 0x40;
+      break;
+
+    case 'd': /* Press Right */
+      cli_controller_state |= 0x80;
+      break;
+
+    case 'H': /* Release A */
+    case ';':
+      cli_controller_state &= ~0x1;
+      break;
+
+    case 'J': /* Release B */
+    case '=':
+      cli_controller_state &= ~0x2;
+      break;
+
+    case 'K': /* Release Select */
+      cli_controller_state &= ~0x4;
+      break;
+
+    case 'L': /* Release Start */
+      cli_controller_state &= ~0x8;
+      break;
+
+    case 'W': /* Release Up */
+      cli_controller_state &= ~0x10;
+      break;
+
+    case 'S': /* Release Down */
+      cli_controller_state &= ~0x20;
+      break;
+
+    case 'A': /* Release Left */
+      cli_controller_state &= ~0x40;
+      break;
+
+    case 'D': /* Release Right */
+      cli_controller_state &= ~0x80;
+      break;
+
+#else
     case ' ':
     case 'z': /* A */
       cli_controller_state |= 0x1;
@@ -515,6 +608,7 @@ cli_update_freeze:
       cli_freeze = false;
       cli_freeze_step = true;
       break;
+#endif
 
     case 'Q':
     case 'q':

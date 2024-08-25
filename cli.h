@@ -18,6 +18,9 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
   uint8_t color_3,
   uint8_t color_4);
 uint8_t cli_get_controller_state(void);
+#ifdef SPECIAL_TERMINAL
+void cli_audio_update(uint16_t freq, uint8_t volume);
+#endif
 #ifdef EXTRA_INFO
 void cli_update(mem_t *mem, ppu_t *ppu, apu_t* apu);
 #else
