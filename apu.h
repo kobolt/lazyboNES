@@ -29,6 +29,13 @@ typedef struct controller_s {
 typedef struct apu_s {
   controller_t controller[APU_CONTROLLERS];
 
+  bool keyboard_enable;
+  bool keyboard_col_select;
+  uint8_t keyboard_row_counter;
+  uint8_t keyboard_port;
+  bool keyboard_cassette_dac;
+  bool keyboard_cassette_adc;
+
   bool sequencer_mode5;
   uint16_t sequencer_divider;
   uint8_t sequencer_step;

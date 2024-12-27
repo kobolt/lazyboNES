@@ -1,10 +1,13 @@
+#include "cli.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <curses.h>
 #include <signal.h>
+#include <ctype.h>
 
+#include "kbd.h"
 #ifdef EXTRA_INFO
 #include "mem.h"
 #include "ppu.h"
@@ -17,6 +20,8 @@
 #define CLI_HEIGHT 30
 
 #define CLI_BUTTON_TIME_SET 22
+#define CLI_TEXT_INJECT_DELAY_NORMAL 4
+#define CLI_TEXT_INJECT_DELAY_RETURN 32
 
 
 
@@ -56,6 +61,44 @@ static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
   '/','\\','\\','\\','\\','/',' ',' ','|','/','|','|','-',' ','|','<',
   '|',' ',' ','|','\\','\\','|','.','v','Y','Y','Y',' ','/','/',' ',
   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+}};
+
+/* ASCII character to use for each tile in BASIC mode: */
+static const chtype cli_tile_map_basic[2][UINT8_MAX + 1] = {
+{
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+},{
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  ' ','!','"','#','$','%','&','\'','(',')','*','+',',','-','.','/',
+  '0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?',
+  '@','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+  'P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
+  '@','@','@','@','@','@','@','@','@','@','@','@','@','#','@','@',
 }};
 
 /* Color to use for tile in 8/16 color mode: */
@@ -168,6 +211,8 @@ static const int cli_bg_palette_map[UINT8_MAX + 1] =
 
 static bool cli_active = false;
 static bool cli_enable_colors = false;
+static bool cli_basic_mode = false;
+static FILE *cli_text_inject_fh = NULL;
 static int cli_maxx;
 static int cli_maxy;
 static uint8_t cli_controller_state = 0;
@@ -225,13 +270,17 @@ void cli_resume(void)
 
 
 
-int cli_init(bool enable_colors)
+int cli_init(bool enable_colors, bool basic_mode)
 {
   int fg;
   int bg;
 
   cli_active = true;
   cli_enable_colors = enable_colors;
+  if (basic_mode) {
+    cli_basic_mode = true;
+    cli_enable_colors = false; /* Override and disable colors! */
+  }
 
   initscr();
   getmaxyx(stdscr, cli_maxy, cli_maxx);
@@ -276,6 +325,8 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
   uint8_t color_3,
   uint8_t color_4)
 {
+  chtype ch;
+
   if (! cli_active) {
     return;
   }
@@ -295,7 +346,11 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
     y -= 1;
   }
 
-  chtype ch = cli_tile_map[table_no][tile];
+  if (cli_basic_mode) {
+    ch = cli_tile_map_basic[table_no][tile];
+  } else {
+    ch = cli_tile_map[table_no][tile];
+  }
 
   if ((table_no == 0 && ch == ' ')) {
     return; /* Do not draw transparent part of sprites. */
@@ -378,6 +433,278 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
 uint8_t cli_get_controller_state(void)
 {
   return cli_controller_state;
+}
+
+
+
+static bool cli_key_is_shifted(int key)
+{
+  if (key == '!' ||
+      key == '"' ||
+      key == '#' ||
+      key == '$' ||
+      key == '%' ||
+      key == '&' ||
+      key == '(' ||
+      key == ')' ||
+      key == '<' ||
+      key == '>' ||
+      key == '+' ||
+      key == '=' ||
+      key == '*' ||
+      key == '?' ||
+      key == '\'' ||
+      key == '_') {
+    return true;
+  }
+
+  return false;
+}
+
+
+
+static bool cli_key_is_control(int key)
+{
+  if (key == '\r' || key == '\n') {
+    return false;
+  } else if (key < 0x20) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+
+int cli_text_inject(const char *filename)
+{
+  if (cli_text_inject_fh != NULL) {
+    return -2; /* Inject already in progress. */
+  }
+
+  cli_text_inject_fh = fopen(filename, "rb");
+  if (cli_text_inject_fh == NULL) {
+    return -1; /* File not found. */
+  }
+
+  return 0;
+}
+
+
+
+static kbd_key_t cli_key_map(int key)
+{
+  switch (key) {
+  case '1':
+  case '!':
+    return KBD_KEY_1;
+  case '2':
+  case '"':
+    return KBD_KEY_2;
+  case '3':
+  case '#':
+    return KBD_KEY_3;
+  case '4':
+  case '$':
+    return KBD_KEY_4;
+  case '5':
+  case '%':
+    return KBD_KEY_5;
+  case '6':
+  case '&':
+    return KBD_KEY_6;
+  case '7':
+  case '\'':
+    return KBD_KEY_7;
+  case '8':
+  case '(':
+    return KBD_KEY_8;
+  case '9':
+  case ')':
+    return KBD_KEY_9;
+  case '0':
+    return KBD_KEY_0;
+
+  case 'a':
+  case 'A':
+  case 0x01:
+    return KBD_KEY_A;
+  case 'b':
+  case 'B':
+    return KBD_KEY_B;
+  case 'c':
+  case 'C':
+  case 0x03:
+    return KBD_KEY_C;
+  case 'd':
+  case 'D':
+    return KBD_KEY_D;
+  case 'e':
+  case 'E':
+  case 0x05:
+    return KBD_KEY_E;
+  case 'f':
+  case 'F':
+    return KBD_KEY_F;
+  case 'g':
+  case 'G':
+  case 0x07:
+    return KBD_KEY_G;
+  case 'h':
+  case 'H':
+  case 0x08:
+    return KBD_KEY_H;
+  case 'i':
+  case 'I':
+  case '\t':
+    return KBD_KEY_I;
+  case 'j':
+  case 'J':
+    return KBD_KEY_J;
+  case 'k':
+  case 'K':
+  case 0x0B:
+    return KBD_KEY_K;
+  case 'l':
+  case 'L':
+  case 0x0C:
+    return KBD_KEY_L;
+  case 'm':
+  case 'M':
+    return KBD_KEY_M;
+  case 'n':
+  case 'N':
+  case 0x0E:
+    return KBD_KEY_N;
+  case 'o':
+  case 'O':
+  case 0x0F:
+    return KBD_KEY_O;
+  case 'p':
+  case 'P':
+  case 0x10:
+    return KBD_KEY_P;
+  case 'q':
+  case 'Q':
+  case 0x11:
+    return KBD_KEY_Q;
+  case 'r':
+  case 'R':
+  case 0x12:
+    return KBD_KEY_R;
+  case 's':
+  case 'S':
+  case 0x13:
+    return KBD_KEY_S;
+  case 't':
+  case 'T':
+  case 0x14:
+    return KBD_KEY_T;
+  case 'u':
+  case 'U':
+  case 0x15:
+    return KBD_KEY_U;
+  case 'v':
+  case 'V':
+  case 0x16:
+    return KBD_KEY_V;
+  case 'w':
+  case 'W':
+  case 0x17:
+    return KBD_KEY_W;
+  case 'x':
+  case 'X':
+  case 0x18:
+    return KBD_KEY_X;
+  case 'y':
+  case 'Y':
+    return KBD_KEY_Y;
+  case 'z':
+  case 'Z':
+    return KBD_KEY_Z;
+
+  case KEY_F(1):
+    return KBD_KEY_F1;
+  case KEY_F(2):
+    return KBD_KEY_F2;
+  case KEY_F(3):
+    return KBD_KEY_F3;
+  case KEY_F(4):
+    return KBD_KEY_F4;
+  case KEY_F(5):
+    return KBD_KEY_F5;
+  case KEY_F(6):
+    return KBD_KEY_F6;
+  case KEY_F(7):
+    return KBD_KEY_F7;
+  case KEY_F(8):
+    return KBD_KEY_F8;
+  case KEY_F(9):
+    return KBD_KEY_STOP;
+  case KEY_F(10):
+    return KBD_KEY_KANA;
+  case KEY_F(11):
+    return KBD_KEY_GRPH;
+
+  case '-':
+  case '=':
+    return KBD_KEY_MINUS;
+  case '^':
+    return KBD_KEY_CARET;
+  case '\\':
+    return KBD_KEY_YEN;
+  case '\e':
+    return KBD_KEY_ESC;
+  case '@':
+    return KBD_KEY_AT;
+  case '[':
+    return KBD_KEY_LEFT_BRACKET;
+  case ']':
+    return KBD_KEY_RIGHT_BRACKET;
+  case ';':
+  case '+':
+    return KBD_KEY_SEMICOLON;
+  case ':':
+  case '*':
+    return KBD_KEY_COLON;
+  case ',':
+  case '<':
+    return KBD_KEY_COMMA;
+  case '.':
+  case '>':
+    return KBD_KEY_PERIOD;
+  case '/':
+  case '?':
+    return KBD_KEY_SLASH;
+  case '_':
+    return KBD_KEY_UNDERSCORE;
+
+  case ' ':
+    return KBD_KEY_SPACE;
+  case '\r':
+  case '\n':
+  case KEY_ENTER:
+    return KBD_KEY_RETURN;
+  case KEY_BACKSPACE:
+    return KBD_KEY_DEL;
+  case KEY_HOME:
+    return KBD_KEY_CLR_HOME;
+  case KEY_IC:
+    return KBD_KEY_INS;
+
+  case KEY_UP:
+    return KBD_KEY_UP;
+  case KEY_DOWN:
+    return KBD_KEY_DOWN;
+  case KEY_LEFT:
+    return KBD_KEY_LEFT;
+  case KEY_RIGHT:
+    return KBD_KEY_RIGHT;
+
+  case ERR:
+  default:
+    return KBD_KEY_NONE;
+  }
 }
 
 
@@ -478,150 +805,186 @@ cli_update_freeze:
   refresh();
   getmaxyx(stdscr, cli_maxy, cli_maxx);
 
-  while ((c = getch()) != ERR) {
-    switch (c) {
-    case KEY_RESIZE:
-      /* Use this event instead of SIGWINCH for better portability. */
-      cli_winch_handler();
-      break;
+  if (cli_basic_mode) {
+    if (cli_text_inject_fh != NULL) {
+      static int inject_delay = 0;
+
+      if (inject_delay > 0) {
+        inject_delay--;
+      } else {
+        c = fgetc(cli_text_inject_fh);
+        if (c == EOF) {
+          fclose(cli_text_inject_fh);
+          cli_text_inject_fh = NULL;
+        }
+        kbd_key_set(cli_key_map(c),
+                    cli_key_is_shifted(c),
+                    cli_key_is_control(c));
+        if (cli_key_map(c) == KBD_KEY_RETURN) {
+          inject_delay = CLI_TEXT_INJECT_DELAY_RETURN;
+        } else {
+          inject_delay = CLI_TEXT_INJECT_DELAY_NORMAL;
+        }
+      }
+      return;
+    }
+
+    while ((c = getch()) != ERR) {
+      if (c == KEY_RESIZE) {
+        cli_winch_handler();
+      } else {
+        kbd_key_set(cli_key_map(c),
+                    cli_key_is_shifted(c),
+                    cli_key_is_control(c));
+      }
+    }
+
+  } else {
+    while ((c = getch()) != ERR) {
+      switch (c) {
+      case KEY_RESIZE:
+        /* Use this event instead of SIGWINCH for better portability. */
+        cli_winch_handler();
+        break;
 
 #ifdef SPECIAL_TERMINAL /* Separate key press and key release events. */
-    case 'h': /* Press A */
-    case ',':
-      cli_controller_state |= 0x1;
-      break;
+      case 'h': /* Press A */
+      case ',':
+        cli_controller_state |= 0x1;
+        break;
 
-    case 'j': /* Press B */
-    case '0':
-      cli_controller_state |= 0x2;
-      break;
+      case 'j': /* Press B */
+      case '0':
+        cli_controller_state |= 0x2;
+        break;
 
-    case 'k': /* Press Select */
-      cli_controller_state |= 0x4;
-      break;
+      case 'k': /* Press Select */
+        cli_controller_state |= 0x4;
+        break;
 
-    case 'l': /* Press Start */
-      cli_controller_state |= 0x8;
-      break;
+      case 'l': /* Press Start */
+        cli_controller_state |= 0x8;
+        break;
 
-    case 'w': /* Press Up */
-      cli_controller_state |= 0x10;
-      break;
+      case 'w': /* Press Up */
+        cli_controller_state |= 0x10;
+        break;
 
-    case 's': /* Press Down */
-      cli_controller_state |= 0x20;
-      break;
+      case 's': /* Press Down */
+        cli_controller_state |= 0x20;
+        break;
 
-    case 'a': /* Press Left */
-      cli_controller_state |= 0x40;
-      break;
+      case 'a': /* Press Left */
+        cli_controller_state |= 0x40;
+        break;
 
-    case 'd': /* Press Right */
-      cli_controller_state |= 0x80;
-      break;
+      case 'd': /* Press Right */
+        cli_controller_state |= 0x80;
+        break;
 
-    case 'H': /* Release A */
-    case ';':
-      cli_controller_state &= ~0x1;
-      break;
+      case 'H': /* Release A */
+      case ';':
+        cli_controller_state &= ~0x1;
+        break;
 
-    case 'J': /* Release B */
-    case '=':
-      cli_controller_state &= ~0x2;
-      break;
+      case 'J': /* Release B */
+      case '=':
+        cli_controller_state &= ~0x2;
+        break;
 
-    case 'K': /* Release Select */
-      cli_controller_state &= ~0x4;
-      break;
+      case 'K': /* Release Select */
+        cli_controller_state &= ~0x4;
+        break;
 
-    case 'L': /* Release Start */
-      cli_controller_state &= ~0x8;
-      break;
+      case 'L': /* Release Start */
+        cli_controller_state &= ~0x8;
+        break;
 
-    case 'W': /* Release Up */
-      cli_controller_state &= ~0x10;
-      break;
+      case 'W': /* Release Up */
+        cli_controller_state &= ~0x10;
+        break;
 
-    case 'S': /* Release Down */
-      cli_controller_state &= ~0x20;
-      break;
+      case 'S': /* Release Down */
+        cli_controller_state &= ~0x20;
+        break;
 
-    case 'A': /* Release Left */
-      cli_controller_state &= ~0x40;
-      break;
+      case 'A': /* Release Left */
+        cli_controller_state &= ~0x40;
+        break;
 
-    case 'D': /* Release Right */
-      cli_controller_state &= ~0x80;
-      break;
+      case 'D': /* Release Right */
+        cli_controller_state &= ~0x80;
+        break;
 
 #else
-    case ' ':
-    case 'z': /* A */
-      cli_controller_state |= 0x1;
-      cli_button_timeout[0] = CLI_BUTTON_TIME_SET;
-      break;
+      case ' ':
+      case 'z': /* A */
+        cli_controller_state |= 0x1;
+        cli_button_timeout[0] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case 'x': /* B */
-      cli_controller_state |= 0x2;
-      cli_button_timeout[1] = CLI_BUTTON_TIME_SET;
-      break;
+      case 'x': /* B */
+        cli_controller_state |= 0x2;
+        cli_button_timeout[1] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case 'c': /* Select */
-      cli_controller_state |= 0x4;
-      cli_button_timeout[2] = CLI_BUTTON_TIME_SET;
-      break;
+      case 'c': /* Select */
+        cli_controller_state |= 0x4;
+        cli_button_timeout[2] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case KEY_ENTER:
-    case '\n':
-    case '\r':
-    case 'v': /* Start */
-      cli_controller_state |= 0x8;
-      cli_button_timeout[3] = CLI_BUTTON_TIME_SET;
-      break;
+      case KEY_ENTER:
+      case '\n':
+      case '\r':
+      case 'v': /* Start */
+        cli_controller_state |= 0x8;
+        cli_button_timeout[3] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case KEY_UP:
-      cli_controller_state |= 0x10;
-      cli_button_timeout[4] = CLI_BUTTON_TIME_SET;
-      break;
+      case KEY_UP:
+        cli_controller_state |= 0x10;
+        cli_button_timeout[4] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case KEY_DOWN:
-      cli_controller_state |= 0x20;
-      cli_button_timeout[5] = CLI_BUTTON_TIME_SET;
-      break;
+      case KEY_DOWN:
+        cli_controller_state |= 0x20;
+        cli_button_timeout[5] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case KEY_LEFT:
-      cli_controller_state |= 0x40;
-      cli_button_timeout[6] = CLI_BUTTON_TIME_SET;
-      break;
+      case KEY_LEFT:
+        cli_controller_state |= 0x40;
+        cli_button_timeout[6] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case KEY_RIGHT:
-      cli_controller_state |= 0x80;
-      cli_button_timeout[7] = CLI_BUTTON_TIME_SET;
-      break;
+      case KEY_RIGHT:
+        cli_controller_state |= 0x80;
+        cli_button_timeout[7] = CLI_BUTTON_TIME_SET;
+        break;
 
-    case 'P':
-    case 'p':
-      cli_freeze = !cli_freeze;
-      break;
+      case 'P':
+      case 'p':
+        cli_freeze = !cli_freeze;
+        break;
 
-    case '.':
-      cli_freeze = false;
-      cli_freeze_step = true;
-      break;
+      case '.':
+        cli_freeze = false;
+        cli_freeze_step = true;
+        break;
 #endif
 
-    case 'Q':
-    case 'q':
-      exit(EXIT_SUCCESS);
-      break;
+      case 'Q':
+      case 'q':
+        exit(EXIT_SUCCESS);
+        break;
 
-    default:
-      break;
+      default:
+        break;
+      }
     }
-  }
 
-  if (cli_freeze) {
-    goto cli_update_freeze;
+    if (cli_freeze) {
+      goto cli_update_freeze;
+    }
   }
 }
 

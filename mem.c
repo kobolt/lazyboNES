@@ -1,9 +1,9 @@
+#include "mem.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "mem.h"
 #include "ppu.h"
 #include "apu.h"
 #include "panic.h"

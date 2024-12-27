@@ -2,6 +2,7 @@
 #define _TAS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 int tas_init(const char *filename);
 uint8_t tas_get_controller_state(void);

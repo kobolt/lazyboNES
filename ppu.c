@@ -1,8 +1,8 @@
+#include "ppu.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "ppu.h"
 #include "mem.h"
 #include "gui.h"
 #include "cli.h"

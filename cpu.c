@@ -1,10 +1,10 @@
+#include "cpu.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "cpu.h"
 #include "mem.h"
 #include "panic.h"
 

@@ -10,7 +10,7 @@
 #include "apu.h"
 #endif
 
-int cli_init(bool enable_colors);
+int cli_init(bool enable_colors, bool basic_mode);
 void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
   uint8_t color_backdrop,
   uint8_t color_1,
@@ -28,5 +28,6 @@ void cli_update(void);
 #endif
 void cli_pause(void);
 void cli_resume(void);
+int cli_text_inject(const char *filename);
 
 #endif /* _CLI_H */

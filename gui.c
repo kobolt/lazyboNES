@@ -1,3 +1,4 @@
+#include "gui.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -6,6 +7,8 @@
 #include <SDL2/SDL_audio.h>
 #include <math.h>
 #include <time.h>
+
+#include "kbd.h"
 
 #define GUI_WIDTH 256
 #define GUI_HEIGHT 240
@@ -29,6 +32,7 @@ static uint8_t gui_controller_state = 0;
 static bool gui_save_state_request = false;
 static bool gui_load_state_request = false;
 static bool gui_warp_mode = false;
+static bool gui_basic_mode = false;
 
 static const uint8_t gui_sys_palette[64][3] =
 {
@@ -288,9 +292,12 @@ static void gui_exit_handler(void)
 
 
 
-int gui_init(int joystick_no, bool disable_video, bool disable_audio)
+int gui_init(int joystick_no, bool disable_video, bool disable_audio,
+  bool basic_mode)
 {
   Uint32 flags;
+
+  gui_basic_mode = basic_mode;
 
   flags = SDL_INIT_JOYSTICK;
   if (! disable_video) {
@@ -348,6 +355,90 @@ int gui_init(int joystick_no, bool disable_video, bool disable_audio)
     return 0;
   } else {
     return gui_audio_init();
+  }
+}
+
+
+
+static kbd_key_t gui_key_map(SDL_Scancode key)
+{
+  switch (key) {
+  case SDL_SCANCODE_1: return KBD_KEY_1;
+  case SDL_SCANCODE_2: return KBD_KEY_2;
+  case SDL_SCANCODE_3: return KBD_KEY_3;
+  case SDL_SCANCODE_4: return KBD_KEY_4;
+  case SDL_SCANCODE_5: return KBD_KEY_5;
+  case SDL_SCANCODE_6: return KBD_KEY_6;
+  case SDL_SCANCODE_7: return KBD_KEY_7;
+  case SDL_SCANCODE_8: return KBD_KEY_8;
+  case SDL_SCANCODE_9: return KBD_KEY_9;
+  case SDL_SCANCODE_0: return KBD_KEY_0;
+
+  case SDL_SCANCODE_A: return KBD_KEY_A;
+  case SDL_SCANCODE_B: return KBD_KEY_B;
+  case SDL_SCANCODE_C: return KBD_KEY_C;
+  case SDL_SCANCODE_D: return KBD_KEY_D;
+  case SDL_SCANCODE_E: return KBD_KEY_E;
+  case SDL_SCANCODE_F: return KBD_KEY_F;
+  case SDL_SCANCODE_G: return KBD_KEY_G;
+  case SDL_SCANCODE_H: return KBD_KEY_H;
+  case SDL_SCANCODE_I: return KBD_KEY_I;
+  case SDL_SCANCODE_J: return KBD_KEY_J;
+  case SDL_SCANCODE_K: return KBD_KEY_K;
+  case SDL_SCANCODE_L: return KBD_KEY_L;
+  case SDL_SCANCODE_M: return KBD_KEY_M;
+  case SDL_SCANCODE_N: return KBD_KEY_N;
+  case SDL_SCANCODE_O: return KBD_KEY_O;
+  case SDL_SCANCODE_P: return KBD_KEY_P;
+  case SDL_SCANCODE_Q: return KBD_KEY_Q;
+  case SDL_SCANCODE_R: return KBD_KEY_R;
+  case SDL_SCANCODE_S: return KBD_KEY_S;
+  case SDL_SCANCODE_T: return KBD_KEY_T;
+  case SDL_SCANCODE_U: return KBD_KEY_U;
+  case SDL_SCANCODE_V: return KBD_KEY_V;
+  case SDL_SCANCODE_W: return KBD_KEY_W;
+  case SDL_SCANCODE_X: return KBD_KEY_X;
+  case SDL_SCANCODE_Y: return KBD_KEY_Y;
+  case SDL_SCANCODE_Z: return KBD_KEY_Z;
+
+  case SDL_SCANCODE_F1:  return KBD_KEY_F1;
+  case SDL_SCANCODE_F2:  return KBD_KEY_F2;
+  case SDL_SCANCODE_F3:  return KBD_KEY_F3;
+  case SDL_SCANCODE_F4:  return KBD_KEY_F4;
+  case SDL_SCANCODE_F5:  return KBD_KEY_F5;
+  case SDL_SCANCODE_F6:  return KBD_KEY_F6;
+  case SDL_SCANCODE_F7:  return KBD_KEY_F7;
+  case SDL_SCANCODE_F8:  return KBD_KEY_F8;
+  case SDL_SCANCODE_F9:  return KBD_KEY_STOP;
+  case SDL_SCANCODE_F10: return KBD_KEY_KANA;
+  case SDL_SCANCODE_F11: return KBD_KEY_GRPH;
+
+  case SDL_SCANCODE_MINUS:        return KBD_KEY_MINUS;
+  case SDL_SCANCODE_EQUALS:       return KBD_KEY_CARET;
+  case SDL_SCANCODE_BACKSLASH:    return KBD_KEY_YEN;
+  case SDL_SCANCODE_ESCAPE:       return KBD_KEY_ESC;
+  case SDL_SCANCODE_GRAVE:        return KBD_KEY_AT;
+  case SDL_SCANCODE_LEFTBRACKET:  return KBD_KEY_LEFT_BRACKET;
+  case SDL_SCANCODE_RIGHTBRACKET: return KBD_KEY_RIGHT_BRACKET;
+  case SDL_SCANCODE_SEMICOLON:    return KBD_KEY_SEMICOLON;
+  case SDL_SCANCODE_APOSTROPHE:   return KBD_KEY_COLON;
+  case SDL_SCANCODE_COMMA:        return KBD_KEY_COMMA;
+  case SDL_SCANCODE_PERIOD:       return KBD_KEY_PERIOD;
+  case SDL_SCANCODE_SLASH:        return KBD_KEY_SLASH;
+  case SDL_SCANCODE_TAB:          return KBD_KEY_UNDERSCORE;
+
+  case SDL_SCANCODE_SPACE:     return KBD_KEY_SPACE;
+  case SDL_SCANCODE_RETURN:    return KBD_KEY_RETURN;
+  case SDL_SCANCODE_BACKSPACE: return KBD_KEY_DEL;
+  case SDL_SCANCODE_HOME:      return KBD_KEY_CLR_HOME;
+  case SDL_SCANCODE_INSERT:    return KBD_KEY_INS;
+  case SDL_SCANCODE_UP:        return KBD_KEY_UP;
+  case SDL_SCANCODE_DOWN:      return KBD_KEY_DOWN;
+  case SDL_SCANCODE_LEFT:      return KBD_KEY_LEFT;
+  case SDL_SCANCODE_RIGHT:     return KBD_KEY_RIGHT;
+
+  default:
+    return KBD_KEY_NONE;
   }
 }
 
@@ -428,179 +519,201 @@ bool gui_load_state_requested(void)
 void gui_update(void)
 {
   SDL_Event event;
+  SDL_Keymod keymod;
 
-  while (SDL_PollEvent(&event) == 1) {
-    switch (event.type) {
-    case SDL_QUIT:
-      exit(EXIT_SUCCESS);
-      break;
+  if (gui_basic_mode) {
+    while (SDL_PollEvent(&event) == 1) {
+      switch (event.type) {
+      case SDL_QUIT:
+        exit(EXIT_SUCCESS);
+        break;
 
-    /* Keyboard-based Controller */
-    case SDL_KEYDOWN:
-    case SDL_KEYUP:
-      switch (event.key.keysym.sym) {
-      case SDLK_SPACE:
-      case SDLK_z: /* A */
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x1;
-        } else {
-          gui_controller_state &= ~0x1;
+      case SDL_KEYDOWN:
+        keymod = SDL_GetModState();
+        kbd_key_set(gui_key_map(event.key.keysym.scancode),
+          (keymod & KMOD_LSHIFT) || (keymod & KMOD_RSHIFT),
+          (keymod & KMOD_LCTRL) || (keymod & KMOD_RCTRL));
+        break;
+
+      default:
+        break;
+      }
+    }
+
+  } else {
+    while (SDL_PollEvent(&event) == 1) {
+      switch (event.type) {
+      case SDL_QUIT:
+        exit(EXIT_SUCCESS);
+        break;
+
+      /* Keyboard-based Controller */
+      case SDL_KEYDOWN:
+      case SDL_KEYUP:
+        switch (event.key.keysym.sym) {
+        case SDLK_SPACE:
+        case SDLK_z: /* A */
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x1;
+          } else {
+            gui_controller_state &= ~0x1;
+          }
+          break;
+
+        case SDLK_x: /* B */
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x2;
+          } else {
+            gui_controller_state &= ~0x2;
+          }
+          break;
+
+        case SDLK_c: /* Select */
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x4;
+          } else {
+            gui_controller_state &= ~0x4;
+          }
+          break;
+
+        case SDLK_RETURN:
+        case SDLK_v: /* Start */
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x8;
+          } else {
+            gui_controller_state &= ~0x8;
+          }
+          break;
+
+        case SDLK_UP:
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x10;
+          } else {
+            gui_controller_state &= ~0x10;
+          }
+          break;
+
+        case SDLK_DOWN:
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x20;
+          } else {
+            gui_controller_state &= ~0x20;
+          }
+          break;
+
+        case SDLK_LEFT:
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x40;
+          } else {
+            gui_controller_state &= ~0x40;
+          }
+          break;
+
+        case SDLK_RIGHT:
+          if (event.type == SDL_KEYDOWN) {
+            gui_controller_state |= 0x80;
+          } else {
+            gui_controller_state &= ~0x80;
+          }
+          break;
+
+        case SDLK_F5: /* Save State */
+          if (event.type == SDL_KEYDOWN) {
+            gui_save_state_request = true;
+          }
+          break;
+
+        case SDLK_F8: /* Load State */
+          if (event.type == SDL_KEYDOWN) {
+            gui_load_state_request = true;
+          }
+          break;
+
+        case SDLK_q: /* Quit */
+          if (event.type == SDL_KEYDOWN) {
+            exit(EXIT_SUCCESS);
+          }
+          break;
         }
         break;
 
-      case SDLK_x: /* B */
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x2;
-        } else {
-          gui_controller_state &= ~0x2;
+      /* Joystick-based Controller */
+      case SDL_JOYAXISMOTION:
+        if (event.jaxis.axis == 0) {
+          if (event.jaxis.value > 16384) { /* Right Pressed */
+            gui_controller_state |=  0x80;
+            gui_controller_state &= ~0x40;
+          } else if (event.jaxis.value < -16384) { /* Left Pressed */
+            gui_controller_state &= ~0x80;
+            gui_controller_state |=  0x40;
+          } else {
+            gui_controller_state &= ~0xC0; /* Right/Left Released */
+          }
+
+        } else if (event.jaxis.axis == 1) {
+          if (event.jaxis.value > 16384) { /* Down Pressed */
+            gui_controller_state |=  0x20;
+            gui_controller_state &= ~0x10;
+          } else if (event.jaxis.value < -16384) { /* Up Pressed */
+            gui_controller_state &= ~0x20;
+            gui_controller_state |=  0x10;
+          } else {
+            gui_controller_state &= ~0x30; /* Down/Up Released */
+          }
         }
         break;
 
-      case SDLK_c: /* Select */
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x4;
-        } else {
-          gui_controller_state &= ~0x4;
-        }
-        break;
+      case SDL_JOYBUTTONDOWN:
+      case SDL_JOYBUTTONUP:
+        switch (event.jbutton.button) {
+        case 1: /* A */
+          if (event.jbutton.state == 1) {
+            gui_controller_state |= 0x1;
+          } else {
+            gui_controller_state &= ~0x1;
+          }
+          break;
 
-      case SDLK_RETURN:
-      case SDLK_v: /* Start */
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x8;
-        } else {
-          gui_controller_state &= ~0x8;
-        }
-        break;
+        case 0: /* B */
+        case 2:
+        case 3:
+          if (event.jbutton.state == 1) {
+            gui_controller_state |= 0x2;
+          } else {
+            gui_controller_state &= ~0x2;
+          }
+          break;
 
-      case SDLK_UP:
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x10;
-        } else {
-          gui_controller_state &= ~0x10;
-        }
-        break;
+        case 4: /* Save State */
+          if (event.jbutton.state == 1) {
+            gui_save_state_request = true;
+          }
+          break;
 
-      case SDLK_DOWN:
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x20;
-        } else {
-          gui_controller_state &= ~0x20;
-        }
-        break;
+        case 5: /* Load State */
+          if (event.jbutton.state == 1) {
+            gui_load_state_request = true;
+          }
+          break;
 
-      case SDLK_LEFT:
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x40;
-        } else {
-          gui_controller_state &= ~0x40;
-        }
-        break;
+        case 6: /* Select */
+          if (event.jbutton.state == 1) {
+            gui_controller_state |= 0x4;
+          } else {
+            gui_controller_state &= ~0x4;
+          }
+          break;
 
-      case SDLK_RIGHT:
-        if (event.type == SDL_KEYDOWN) {
-          gui_controller_state |= 0x80;
-        } else {
-          gui_controller_state &= ~0x80;
-        }
-        break;
-
-      case SDLK_F5: /* Save State */
-        if (event.type == SDL_KEYDOWN) {
-          gui_save_state_request = true;
-        }
-        break;
-
-      case SDLK_F8: /* Load State */
-        if (event.type == SDL_KEYDOWN) {
-          gui_load_state_request = true;
-        }
-        break;
-
-      case SDLK_q: /* Quit */
-        if (event.type == SDL_KEYDOWN) {
-          exit(EXIT_SUCCESS);
+        case 7: /* Start */
+          if (event.jbutton.state == 1) {
+            gui_controller_state |= 0x8;
+          } else {
+            gui_controller_state &= ~0x8;
+          }
+          break;
         }
         break;
       }
-      break;
-
-    /* Joystick-based Controller */
-    case SDL_JOYAXISMOTION:
-      if (event.jaxis.axis == 0) {
-        if (event.jaxis.value > 16384) { /* Right Pressed */
-          gui_controller_state |=  0x80;
-          gui_controller_state &= ~0x40;
-        } else if (event.jaxis.value < -16384) { /* Left Pressed */
-          gui_controller_state &= ~0x80;
-          gui_controller_state |=  0x40;
-        } else {
-          gui_controller_state &= ~0xC0; /* Right/Left Released */
-        }
-
-      } else if (event.jaxis.axis == 1) {
-        if (event.jaxis.value > 16384) { /* Down Pressed */
-          gui_controller_state |=  0x20;
-          gui_controller_state &= ~0x10;
-        } else if (event.jaxis.value < -16384) { /* Up Pressed */
-          gui_controller_state &= ~0x20;
-          gui_controller_state |=  0x10;
-        } else {
-          gui_controller_state &= ~0x30; /* Down/Up Released */
-        }
-      }
-      break;
-
-    case SDL_JOYBUTTONDOWN:
-    case SDL_JOYBUTTONUP:
-      switch (event.jbutton.button) {
-      case 1: /* A */
-        if (event.jbutton.state == 1) {
-          gui_controller_state |= 0x1;
-        } else {
-          gui_controller_state &= ~0x1;
-        }
-        break;
-
-      case 0: /* B */
-      case 2:
-      case 3:
-        if (event.jbutton.state == 1) {
-          gui_controller_state |= 0x2;
-        } else {
-          gui_controller_state &= ~0x2;
-        }
-        break;
-
-      case 4: /* Save State */
-        if (event.jbutton.state == 1) {
-          gui_save_state_request = true;
-        }
-        break;
-
-      case 5: /* Load State */
-        if (event.jbutton.state == 1) {
-          gui_load_state_request = true;
-        }
-        break;
-
-      case 6: /* Select */
-        if (event.jbutton.state == 1) {
-          gui_controller_state |= 0x4;
-        } else {
-          gui_controller_state &= ~0x4;
-        }
-        break;
-
-      case 7: /* Start */
-        if (event.jbutton.state == 1) {
-          gui_controller_state |= 0x8;
-        } else {
-          gui_controller_state &= ~0x8;
-        }
-        break;
-      }
-      break;
     }
   }
 

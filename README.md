@@ -13,6 +13,7 @@ Some features:
 * Monochrome, 8 ANSI colors or 256 color support, depending on terminal.
 * Accepts TAS input in the FM2 format.
 * Famicom Disk System (FDS) support to load Super Mario Bros 2.
+* HVC-007 keyboard and HVC-008 data recorder support in "BASIC mode".
 
 Screenshot from SMB1:
 ```

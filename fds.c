@@ -1,9 +1,9 @@
+#include "fds.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "fds.h"
 #include "mem.h"
 #include "ppu.h"
 #include "panic.h"

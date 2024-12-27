@@ -1,9 +1,10 @@
+#include "apu.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "apu.h"
 #include "mem.h"
+#include "kbd.h"
 #include "gui.h"
 #include "cli.h"
 #include "tas.h"
@@ -53,6 +54,13 @@ static uint8_t apu_read_hook(void *apu, uint16_t address)
   case APU_JOY_1:
   case APU_JOY_2:
     controller = (address == APU_JOY_1) ? 0 : 1;
+    if (((apu_t *)apu)->keyboard_enable) {
+      if (controller == 1) { /* Keyboard */
+        return ((apu_t *)apu)->keyboard_port;
+      } else { /* Cassette */
+        return ((apu_t *)apu)->keyboard_cassette_adc << 1;
+      }
+    }
     if (((apu_t *)apu)->controller[controller].strobe == true) {
       /* Return first bit ('A' Button) if strobe is high. */
       return ((apu_t *)apu)->controller[controller].data.a;
@@ -62,6 +70,7 @@ static uint8_t apu_read_hook(void *apu, uint16_t address)
       ((apu_t *)apu)->controller[controller].shift++;
       return value;
     }
+    return 0;
 
   default:
     return 0; /* Other registers are write-only. */
@@ -192,11 +201,26 @@ static void apu_write_hook(void *apu, uint16_t address, uint8_t value)
   case APU_JOY_1:
     ((apu_t *)apu)->controller[0].strobe = value & 1;
     ((apu_t *)apu)->controller[1].strobe = value & 1;
+    ((apu_t *)apu)->keyboard_enable = value & 4;
+    if (value & 4) {
+      if ((((apu_t *)apu)->keyboard_col_select == true) && (value & 2) == 0) {
+        /* Increment row counter on high->low transition. */
+        ((apu_t *)apu)->keyboard_row_counter++;
+      }
+      ((apu_t *)apu)->keyboard_col_select = (value & 2) >> 1;
+    }
     if (value & 1) {
       /* Reset shift registers. */
       ((apu_t *)apu)->controller[0].shift = 0;
       ((apu_t *)apu)->controller[1].shift = 0;
+      ((apu_t *)apu)->keyboard_row_counter = 0;
+      ((apu_t *)apu)->keyboard_cassette_dac = true;
+    } else {
+      ((apu_t *)apu)->keyboard_cassette_dac = false;
     }
+    ((apu_t *)apu)->keyboard_port = kbd_port_get(
+      ((apu_t *)apu)->keyboard_row_counter,
+      ((apu_t *)apu)->keyboard_col_select);
     break;
 
   case APU_FRAME_CNT:
@@ -528,6 +552,11 @@ void apu_dump(FILE *fh, apu_t *apu)
       apu->controller[i].shift,
       apu->controller[i].strobe);
   }
+
+  fprintf(fh, "Keyboard\n");
+  fprintf(fh, "  Enable       : %d\n", apu->keyboard_enable);
+  fprintf(fh, "  Column Select: %d\n", apu->keyboard_col_select);
+  fprintf(fh, "  Row Counter  : %d\n", apu->keyboard_row_counter);
 
   fprintf(fh, "Sequencer Mode: %d-step\n", 
     (apu->sequencer_mode5 == true) ? 5 : 4);

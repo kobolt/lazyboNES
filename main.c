@@ -14,9 +14,16 @@
 #include "ppu.h"
 #include "apu.h"
 #include "fds.h"
+#include "kbd.h"
 #include "gui.h"
 #include "cli.h"
 #include "tas.h"
+
+
+
+#define DEBUGGER_KEYBOARD_INJECT_FILE "input.txt"
+#define DEBUGGER_CASSETTE_LOAD_FILE "cas.wav"
+#define DEBUGGER_CASSETTE_SAVE_FILE "cas.wav"
 
 
 
@@ -42,6 +49,7 @@ static bool debugger(void)
 {
   int i;
   char cmd[16];
+  int result;
 
   fprintf(stdout, "\n");
   while (1) {
@@ -71,6 +79,14 @@ static bool debugger(void)
       fprintf(stdout, "  5 - Dump APU\n");
       fprintf(stdout, "  6 - Dump other RAM\n");
       fprintf(stdout, "  7 - Dump FDS\n");
+      fprintf(stdout, "BASIC Mode Commands:\n");
+      fprintf(stdout, "  t - Inject \""
+        DEBUGGER_KEYBOARD_INJECT_FILE "\" text file as keyboard input.\n");
+      fprintf(stdout, "  l - Load \""
+        DEBUGGER_CASSETTE_LOAD_FILE "\" cassette WAV file.\n");
+      fprintf(stdout, "  k - Start saving \""
+        DEBUGGER_CASSETTE_SAVE_FILE "\" cassette WAV file.\n");
+      fprintf(stdout, "  K - Stop saving cassette WAV file.\n");
       break;
 
     case 'c': /* Continue */
@@ -90,6 +106,46 @@ static bool debugger(void)
       } else {
         gui_warp_mode_set(true);
         fprintf(stdout, "Warp mode enabled.\n");
+      }
+      break;
+
+    case 't':
+      result = cli_text_inject(DEBUGGER_KEYBOARD_INJECT_FILE);
+      if (result != 0) {
+        fprintf(stdout, "Failed to inject text file! Error Code: %d\n",
+            result);
+      } else {
+        fprintf(stdout, "Injecting text file...\n");
+      }
+      break;
+
+    case 'l':
+      result = kbd_cassette_load_file(DEBUGGER_CASSETTE_LOAD_FILE);
+      if (result != 0) {
+        fprintf(stdout, "Failed to start load WAV file! Code: %d\n",
+          result);
+      } else {
+        fprintf(stdout, "Cassette WAV file playback...\n");
+      }
+      break;
+
+    case 'k':
+      result = kbd_cassette_save_file_start(DEBUGGER_CASSETTE_SAVE_FILE);
+      if (result != 0) {
+        fprintf(stdout, "Failed to start saving of WAV file! Code: %d\n",
+          result);
+      } else {
+        fprintf(stdout, "Cassette WAV file recording...\n");
+      }
+      break;
+
+    case 'K':
+      result = kbd_cassette_save_file_stop();
+      if (result != 0) {
+        fprintf(stdout, "Failed to stop saving of WAV file! Code: %d\n",
+          result);
+      } else {
+        fprintf(stdout, "Cassette WAV file recording finished.\n");
       }
       break;
 
@@ -201,6 +257,7 @@ static void display_help(const char *progname)
     "  -j NO     Use SDL joystick NO instead of 0.\n"
     "  -t FILE   Use FM2 FILE as input for TAS.\n"
     "  -f FILE   Enable Famicom Disk System and use FILE as FDS BIOS.\n"
+    "  -b        Enable BASIC mode with keyboard and data recorder."
     "\n");
 }
 
@@ -216,9 +273,10 @@ int main(int argc, char *argv[])
   bool disable_audio = false;
   bool disable_terminal = false;
   bool enable_colors = true;
+  bool basic_mode = false;
   int joystick_no = 0;
 
-  while ((c = getopt(argc, argv, "hdvakcj:t:f:")) != -1) {
+  while ((c = getopt(argc, argv, "hdvakcj:t:f:b")) != -1) {
     switch (c) {
     case 'h':
       display_help(argv[0]);
@@ -256,6 +314,10 @@ int main(int argc, char *argv[])
       fds_bios_filename = optarg;
       break;
 
+    case 'b':
+      basic_mode = true;
+      break;
+
     case '?':
     default:
       display_help(argv[0]);
@@ -276,6 +338,7 @@ int main(int argc, char *argv[])
   mem_init(&main_mem);
   ppu_init(&main_ppu, &main_mem);
   apu_init(&main_apu, &main_mem);
+  kbd_init();
 
   if (fds_bios_filename != NULL) {
     /* Famicom Disk System */
@@ -304,13 +367,13 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (gui_init(joystick_no, disable_video, disable_audio) != 0) {
+  if (gui_init(joystick_no, disable_video, disable_audio, basic_mode) != 0) {
     fprintf(stderr, "Failed to initialize GUI!\n");
     return EXIT_FAILURE;
   }
 
   if (! disable_terminal) {
-    if (cli_init(enable_colors) != 0) {
+    if (cli_init(enable_colors, basic_mode) != 0) {
       fprintf(stderr, "Failed to initialize CLI!\n");
       return EXIT_FAILURE;
     }
@@ -333,6 +396,8 @@ int main(int argc, char *argv[])
       ppu_execute(&main_ppu);
       ppu_execute(&main_ppu);
       fds_execute(&main_fds);
+      kbd_cassette_execute(main_apu.keyboard_cassette_dac,
+        &main_apu.keyboard_cassette_adc);
       main_cpu.cycles--;
     }
 
@@ -348,6 +413,7 @@ int main(int argc, char *argv[])
     if (main_ppu.trigger_nmi) {
       cpu_nmi(&main_cpu, &main_mem);
       main_ppu.trigger_nmi = false;
+      kbd_key_clear();
       gui_update();
 #ifdef EXTRA_INFO
       cli_update(&main_mem, &main_ppu, &main_apu);
