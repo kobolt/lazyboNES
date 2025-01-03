@@ -86,6 +86,7 @@ Information on my blog:
 * [lazyboNES Emulator TAS Support](https://kobolt.github.io/article-206.html)
 * [lazyboNES Emulator FDS Support](https://kobolt.github.io/article-216.html)
 * [lazyboNES Emulator Telnet Hacks](https://kobolt.github.io/article-240.html)
+* [lazyboNES Emulator Famicom BASIC Support](https://kobolt.github.io/article-247.html)
 
 YouTube videos:
 * [Text-mode Super Mario Bros](https://www.youtube.com/shorts/0doygelPMto)
@@ -93,4 +94,5 @@ YouTube videos:
 * [Super Mario Bros 2 (Famicom Disk System)](https://www.youtube.com/watch?v=EG1NTZ5mrTo)
 * [256-color terminal mode](https://www.youtube.com/watch?v=1N4DXhKInMk)
 * [On a real Commodore PC 50-II](https://www.youtube.com/watch?v=rBhs5TBwTWY)
+* [Family BASIC program transfer](https://www.youtube.com/watch?v=r433SpSR-e4)
 
