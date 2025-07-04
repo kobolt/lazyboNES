@@ -5,7 +5,7 @@
 
 #include "mem.h"
 #include "gui.h"
-#include "cli.h"
+#include "tui.h"
 #include "panic.h"
 
 #define PPU_PIXEL_UNUSED 255
@@ -317,7 +317,7 @@ static void ppu_draw_background(ppu_t *ppu, uint8_t pixels[])
     }
 
     if (ppu->scanline % 8 == 0) {
-      cli_draw_tile(vtile, base_htile, ppu->bg_tile_sel, nt,
+      tui_draw_tile(vtile, base_htile, ppu->bg_tile_sel, nt,
         ppu->palette_ram[0],
         ppu->palette_ram[(palette_group * 4)],
         ppu->palette_ram[(palette_group * 4) + 1],
@@ -372,7 +372,7 @@ static void ppu_draw_sprites(ppu_t *ppu, uint8_t pixels[], int prio)
       palette_group = (ppu->sprite_ram[sprite+2] & 0x3) + 4;
 
       if (ppu->scanline % 8 == 0) {
-        cli_draw_tile(ppu->sprite_ram[sprite] / 8,
+        tui_draw_tile(ppu->sprite_ram[sprite] / 8,
                      (ppu->sprite_ram[sprite+3] + 4) / 8,
                       ppu->sprite_tile_sel, nt,
                       ppu->palette_ram[0],

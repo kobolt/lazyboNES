@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define KBD_CASSETTE_INTERNAL_SAMPLE_RATE 1789773 /* CPU Clock Speed */
-#define KBD_CASSETTE_WAV_SAMPLE_RATE 44100
+#define KBD_CASSETTE_SAVE_WAV_SAMPLE_RATE 44100
 
 typedef struct wav_header_s {
   uint8_t riff_string[4];
@@ -367,11 +367,8 @@ int kbd_cassette_load_file(const char *filename)
     return -4; /* Not a WAV file? */
   }
 
-  if (header.sample_rate != KBD_CASSETTE_WAV_SAMPLE_RATE) {
-    fclose(kbd.cassette_load_fh);
-    kbd.cassette_load_fh = NULL;
-    return -5; /* Unsupported sample rate. */
-  }
+  /* Multiple sample rates supported when loading. */
+  kbd.cassette_load_sample_rate = header.sample_rate;
 
   if (header.channels != 1) {
     fclose(kbd.cassette_load_fh);
@@ -422,8 +419,8 @@ int kbd_cassette_save_file_start(const char *filename)
   header.subchunk1_size = 16;
   header.audio_format = 1; /* PCM */
   header.channels = 1; /* Mono */
-  header.sample_rate = KBD_CASSETTE_WAV_SAMPLE_RATE;
-  header.byte_rate = KBD_CASSETTE_WAV_SAMPLE_RATE;
+  header.sample_rate = KBD_CASSETTE_SAVE_WAV_SAMPLE_RATE;
+  header.byte_rate = KBD_CASSETTE_SAVE_WAV_SAMPLE_RATE;
   header.block_align = 1;
   header.bits_per_sample = 8;
   header.data_string[0] = 'd';
@@ -472,7 +469,7 @@ void kbd_cassette_execute(bool dac, bool *adc)
   if (kbd.cassette_save_fh != NULL) {
     if (kbd.cassette_cycle %
       (KBD_CASSETTE_INTERNAL_SAMPLE_RATE /
-       KBD_CASSETTE_WAV_SAMPLE_RATE) == 0) {
+       KBD_CASSETTE_SAVE_WAV_SAMPLE_RATE) == 0) {
       if (dac == true) {
         sample = UINT8_MAX;
       } else {
@@ -486,7 +483,7 @@ void kbd_cassette_execute(bool dac, bool *adc)
   if (kbd.cassette_load_fh != NULL) {
     if (kbd.cassette_cycle %
       (KBD_CASSETTE_INTERNAL_SAMPLE_RATE /
-       KBD_CASSETTE_WAV_SAMPLE_RATE) == 0) {
+       kbd.cassette_load_sample_rate) == 0) {
 
       if (fread(&sample, sizeof(uint8_t), 1, kbd.cassette_load_fh) != 1) {
         fclose(kbd.cassette_load_fh);

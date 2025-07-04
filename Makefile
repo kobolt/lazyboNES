@@ -3,7 +3,7 @@ LDFLAGS=-lSDL2 -lm -lncursesw
 
 all: lazyboNES
 
-lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o fds.o kbd.o gui.o cli.o tas.o
+lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o fds.o kbd.o gui.o tui.o tas.o
 	gcc -o lazyboNES $^ ${LDFLAGS}
 
 main.o: main.c
@@ -33,7 +33,7 @@ kbd.o: kbd.c
 gui.o: gui.c
 	gcc -c $^ ${CFLAGS}
 
-cli.o: cli.c
+tui.o: tui.c
 	gcc -c $^ ${CFLAGS}
 
 tas.o: tas.c

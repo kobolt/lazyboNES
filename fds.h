@@ -76,6 +76,7 @@ typedef struct fds_s {
   uint8_t image[FDS_IMAGE_SIZE];
 
   ppu_t *ppu;
+  int wait;
 
   fds_file_info_t file_info[FDS_FILE_INFO_MAX];
 } fds_t;

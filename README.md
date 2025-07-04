@@ -81,6 +81,17 @@ Screenshot from SMB2:
 ################################
 ```
 
+Version history:
+* 0.1 - Initial version.
+* 0.2 - Terminal 8 color (ANSI) support added.
+* 0.3 - TAS support added.
+* 0.4 - CPU compatibility improved.
+* 0.5 - Famicom Disk System support added.
+* 0.6 - Terminal 256 color support added.
+* 0.7 - Special Telnet support added.
+* 0.8 - Famicom BASIC cassette and keyboard support added.
+* 0.9 - Famicom BASIC controller support fixed.
+
 Information on my blog:
 * [lazyboNES Emulator](https://kobolt.github.io/article-194.html)
 * [lazyboNES Emulator TAS Support](https://kobolt.github.io/article-206.html)

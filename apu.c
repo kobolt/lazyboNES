@@ -6,7 +6,7 @@
 #include "mem.h"
 #include "kbd.h"
 #include "gui.h"
-#include "cli.h"
+#include "tui.h"
 #include "tas.h"
 #include "panic.h"
 
@@ -53,24 +53,24 @@ static uint8_t apu_read_hook(void *apu, uint16_t address)
 
   case APU_JOY_1:
   case APU_JOY_2:
+    value = 0;
     controller = (address == APU_JOY_1) ? 0 : 1;
     if (((apu_t *)apu)->keyboard_enable) {
       if (controller == 1) { /* Keyboard */
-        return ((apu_t *)apu)->keyboard_port;
+        value |= ((apu_t *)apu)->keyboard_port;
       } else { /* Cassette */
-        return ((apu_t *)apu)->keyboard_cassette_adc << 1;
+        value |= (((apu_t *)apu)->keyboard_cassette_adc << 1);
       }
     }
     if (((apu_t *)apu)->controller[controller].strobe == true) {
       /* Return first bit ('A' Button) if strobe is high. */
-      return ((apu_t *)apu)->controller[controller].data.a;
+      value |= ((apu_t *)apu)->controller[controller].data.a;
     } else {
-      value = (((apu_t *)apu)->controller[controller].data.byte >>
-        (((apu_t *)apu)->controller[controller].shift)) & 0x1;
+      value |= ((((apu_t *)apu)->controller[controller].data.byte >>
+        (((apu_t *)apu)->controller[controller].shift)) & 0x1);
       ((apu_t *)apu)->controller[controller].shift++;
-      return value;
     }
-    return 0;
+    return value;
 
   default:
     return 0; /* Other registers are write-only. */
@@ -438,7 +438,7 @@ void apu_execute(apu_t *apu)
     apu->controller[0].data.byte = tas_get_controller_state();
   } else {
     apu->controller[0].data.byte = gui_get_controller_state() |
-                                   cli_get_controller_state();
+                                   tui_get_controller_state();
   }
 
   /* Runs at 240Hz */
@@ -497,7 +497,7 @@ void apu_execute(apu_t *apu)
           1789773 / (16 * (apu->pulse_timer[i] + 1)), volume);
 #ifdef SPECIAL_TERMINAL
         if (i == 1) {
-          cli_audio_update(1789773 / (16 * (apu->pulse_timer[1] + 1)), volume);
+          tui_audio_update(1789773 / (16 * (apu->pulse_timer[1] + 1)), volume);
         }
 #endif
 
@@ -505,7 +505,7 @@ void apu_execute(apu_t *apu)
         gui_audio_square_update(i, 0, 0);
 #ifdef SPECIAL_TERMINAL
         if (i == 1) {
-          cli_audio_update(0, 0);
+          tui_audio_update(0, 0);
         }
 #endif
       }

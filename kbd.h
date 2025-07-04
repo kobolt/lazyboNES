@@ -91,6 +91,7 @@ typedef struct kbd_s {
   FILE *cassette_load_fh;
   FILE *cassette_save_fh;
   uint32_t cassette_save_sample_count;
+  uint32_t cassette_load_sample_rate;
 } kbd_t;
 
 void kbd_init(void);

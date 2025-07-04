@@ -1,4 +1,4 @@
-#include "cli.h"
+#include "tui.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -16,17 +16,17 @@
 
 
 
-#define CLI_WIDTH 32
-#define CLI_HEIGHT 30
+#define TUI_WIDTH 32
+#define TUI_HEIGHT 30
 
-#define CLI_BUTTON_TIME_SET 22
-#define CLI_TEXT_INJECT_DELAY_NORMAL 4
-#define CLI_TEXT_INJECT_DELAY_RETURN 32
+#define TUI_BUTTON_TIME_SET 22
+#define TUI_TEXT_INJECT_DELAY_NORMAL 4
+#define TUI_TEXT_INJECT_DELAY_RETURN 32
 
 
 
 /* ASCII character to use for each tile: */
-static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
+static const chtype tui_tile_map[2][UINT8_MAX + 1] = {
 {
   '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
   '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
@@ -64,7 +64,7 @@ static const chtype cli_tile_map[2][UINT8_MAX + 1] = {
 }};
 
 /* ASCII character to use for each tile in BASIC mode: */
-static const chtype cli_tile_map_basic[2][UINT8_MAX + 1] = {
+static const chtype tui_tile_map_basic[2][UINT8_MAX + 1] = {
 {
   '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
   '@','@','@','@','@','@','@','@','@','@','@','@','@','@','@','@',
@@ -102,7 +102,7 @@ static const chtype cli_tile_map_basic[2][UINT8_MAX + 1] = {
 }};
 
 /* Color to use for tile in 8/16 color mode: */
-static const int cli_color_map[2][UINT8_MAX + 1] = {
+static const int tui_color_map[2][UINT8_MAX + 1] = {
 {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -140,7 +140,7 @@ static const int cli_color_map[2][UINT8_MAX + 1] = {
 }};
 
 /* Color mapping in 256 color mode, from the default rxvt color palette: */
-static const uint8_t cli_sys_palette[64] =
+static const uint8_t tui_sys_palette[64] =
 {
   242,  20,  21,  56,  54,  88,  52,  52,  22,  22,  22,  22,  18,  16, 16, 16,
   246,  26,  27,  98, 128, 162, 130,  94,  64,  28,  28,  28,  25,  16, 16, 16,
@@ -149,7 +149,7 @@ static const uint8_t cli_sys_palette[64] =
 };
 
 /* Foreground color number to use for tile in 256 color mode: */
-static const int cli_fg_palette_map[2][UINT8_MAX + 1] = {
+static const int tui_fg_palette_map[2][UINT8_MAX + 1] = {
 {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -187,7 +187,7 @@ static const int cli_fg_palette_map[2][UINT8_MAX + 1] = {
 }};
 
 /* Background color number to use for background tile in 256 color mode: */
-static const int cli_bg_palette_map[UINT8_MAX + 1] =
+static const int tui_bg_palette_map[UINT8_MAX + 1] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -209,25 +209,25 @@ static const int cli_bg_palette_map[UINT8_MAX + 1] =
 
 
 
-static bool cli_active = false;
-static bool cli_enable_colors = false;
-static bool cli_basic_mode = false;
-static FILE *cli_text_inject_fh = NULL;
-static int cli_maxx;
-static int cli_maxy;
-static uint8_t cli_controller_state = 0;
+static bool tui_active = false;
+static bool tui_enable_colors = false;
+static bool tui_basic_mode = false;
+static FILE *tui_text_inject_fh = NULL;
+static int tui_maxx;
+static int tui_maxy;
+static uint8_t tui_controller_state = 0;
 #ifndef SPECIAL_TERMINAL
-static uint16_t cli_button_timeout[8] = {0,0,0,0,0,0,0,0};
-static const uint8_t cli_button_map[8] = 
+static uint16_t tui_button_timeout[8] = {0,0,0,0,0,0,0,0};
+static const uint8_t tui_button_map[8] = 
   {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
 #endif
 
-static bool cli_freeze = false;
-static bool cli_freeze_step = false;
+static bool tui_freeze = false;
+static bool tui_freeze_step = false;
 
 
 
-static void cli_exit_handler(void)
+static void tui_exit_handler(void)
 {
 #ifdef SPECIAL_TERMINAL
   fprintf(stderr, "\e[x"); /* Silence */
@@ -237,7 +237,7 @@ static void cli_exit_handler(void)
 
 
 
-static void cli_winch_handler(void)
+static void tui_winch_handler(void)
 {
   refresh();
   flushinp();
@@ -246,9 +246,9 @@ static void cli_winch_handler(void)
 
 
 
-void cli_pause(void)
+void tui_pause(void)
 {
-  if (! cli_active) {
+  if (! tui_active) {
     return;
   }
 
@@ -258,9 +258,9 @@ void cli_pause(void)
 
 
 
-void cli_resume(void)
+void tui_resume(void)
 {
-  if (! cli_active) {
+  if (! tui_active) {
     return;
   }
 
@@ -270,26 +270,26 @@ void cli_resume(void)
 
 
 
-int cli_init(bool enable_colors, bool basic_mode)
+int tui_init(bool enable_colors, bool basic_mode)
 {
   int fg;
   int bg;
 
-  cli_active = true;
-  cli_enable_colors = enable_colors;
+  tui_active = true;
+  tui_enable_colors = enable_colors;
   if (basic_mode) {
-    cli_basic_mode = true;
-    cli_enable_colors = false; /* Override and disable colors! */
+    tui_basic_mode = true;
+    tui_enable_colors = false; /* Override and disable colors! */
   }
 
   initscr();
-  getmaxyx(stdscr, cli_maxy, cli_maxx);
-  atexit(cli_exit_handler);
+  getmaxyx(stdscr, tui_maxy, tui_maxx);
+  atexit(tui_exit_handler);
   noecho();
   keypad(stdscr, TRUE);
   timeout(0); /* Non-blocking mode. */
 
-  if (cli_enable_colors && has_colors()) {
+  if (tui_enable_colors && has_colors()) {
     start_color();
 
     if (COLOR_PAIRS >= 4096) {
@@ -298,7 +298,7 @@ int cli_init(bool enable_colors, bool basic_mode)
       for (bg = 0; bg < 64; bg++) {
         for (fg = 0; fg < 64; fg++) {
           init_pair((bg * 64) + fg + 1,
-            cli_sys_palette[fg], cli_sys_palette[bg]);
+            tui_sys_palette[fg], tui_sys_palette[bg]);
         }
       }
     } else {
@@ -318,7 +318,7 @@ int cli_init(bool enable_colors, bool basic_mode)
 
 
 
-void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
+void tui_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
   uint8_t color_backdrop,
   uint8_t color_1,
   uint8_t color_2,
@@ -327,29 +327,29 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
 {
   chtype ch;
 
-  if (! cli_active) {
+  if (! tui_active) {
     return;
   }
-  if (x >= CLI_WIDTH) {
+  if (x >= TUI_WIDTH) {
     return;
   }
-  if (y >= CLI_HEIGHT) {
+  if (y >= TUI_HEIGHT) {
     return;
   }
 
   /* Crop from top if screen height is reduced: */
-  if (cli_maxy < 25) {
+  if (tui_maxy < 25) {
     y -= 3;
-  } else if (cli_maxy < 26) {
+  } else if (tui_maxy < 26) {
     y -= 2;
-  } else if (cli_maxy < 27) {
+  } else if (tui_maxy < 27) {
     y -= 1;
   }
 
-  if (cli_basic_mode) {
-    ch = cli_tile_map_basic[table_no][tile];
+  if (tui_basic_mode) {
+    ch = tui_tile_map_basic[table_no][tile];
   } else {
-    ch = cli_tile_map[table_no][tile];
+    ch = tui_tile_map[table_no][tile];
   }
 
   if ((table_no == 0 && ch == ' ')) {
@@ -361,7 +361,7 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
     int fg;
     int bg;
 
-    switch (cli_fg_palette_map[table_no][tile]) {
+    switch (tui_fg_palette_map[table_no][tile]) {
     case 1:
       fg = color_1;
       break;
@@ -383,7 +383,7 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
     if (table_no == 0) {
       bg = color_backdrop;
     } else {
-      switch (cli_bg_palette_map[tile]) {
+      switch (tui_bg_palette_map[tile]) {
       case 1:
         bg = color_1;
         break;
@@ -410,16 +410,16 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
 
   } else {
     /* 8/16 Color Mode or Monochrome */
-    int color_pair = cli_color_map[table_no][tile];
+    int color_pair = tui_color_map[table_no][tile];
 
     if (table_no == 0) {
       attron(A_BOLD);
     }
-    if (cli_enable_colors && has_colors()) {
+    if (tui_enable_colors && has_colors()) {
       attron(COLOR_PAIR(color_pair));
     }
     mvaddch(y, x, ch);
-    if (cli_enable_colors && has_colors()) {
+    if (tui_enable_colors && has_colors()) {
       attroff(COLOR_PAIR(color_pair));
     }
     if (table_no == 0) {
@@ -430,14 +430,14 @@ void cli_draw_tile(uint8_t y, uint8_t x, bool table_no, uint8_t tile,
 
 
 
-uint8_t cli_get_controller_state(void)
+uint8_t tui_get_controller_state(void)
 {
-  return cli_controller_state;
+  return tui_controller_state;
 }
 
 
 
-static bool cli_key_is_shifted(int key)
+static bool tui_key_is_shifted(int key)
 {
   if (key == '!' ||
       key == '"' ||
@@ -463,7 +463,7 @@ static bool cli_key_is_shifted(int key)
 
 
 
-static bool cli_key_is_control(int key)
+static bool tui_key_is_control(int key)
 {
   if (key == '\r' || key == '\n') {
     return false;
@@ -476,14 +476,14 @@ static bool cli_key_is_control(int key)
 
 
 
-int cli_text_inject(const char *filename)
+int tui_text_inject(const char *filename)
 {
-  if (cli_text_inject_fh != NULL) {
+  if (tui_text_inject_fh != NULL) {
     return -2; /* Inject already in progress. */
   }
 
-  cli_text_inject_fh = fopen(filename, "rb");
-  if (cli_text_inject_fh == NULL) {
+  tui_text_inject_fh = fopen(filename, "rb");
+  if (tui_text_inject_fh == NULL) {
     return -1; /* File not found. */
   }
 
@@ -492,7 +492,7 @@ int cli_text_inject(const char *filename)
 
 
 
-static kbd_key_t cli_key_map(int key)
+static kbd_key_t tui_key_map(int key)
 {
   switch (key) {
   case '1':
@@ -710,7 +710,7 @@ static kbd_key_t cli_key_map(int key)
 
 
 #ifdef SPECIAL_TERMINAL
-void cli_audio_update(uint16_t freq, uint8_t volume)
+void tui_audio_update(uint16_t freq, uint8_t volume)
 {
   /* Send special custom CSI codes with stderr to bypass curses. */
   if (volume > 0) {
@@ -724,23 +724,23 @@ void cli_audio_update(uint16_t freq, uint8_t volume)
 
 
 #ifdef EXTRA_INFO
-void cli_update(mem_t *mem, ppu_t *ppu, apu_t* apu)
+void tui_update(mem_t *mem, ppu_t *ppu, apu_t* apu)
 #else
-void cli_update(void)
+void tui_update(void)
 #endif
 {
   int c;
 
-  if (! cli_active) {
+  if (! tui_active) {
     return;
   }
 
 #ifndef SPECIAL_TERMINAL
   for (int i = 0; i < 8; i++) {
-    if (cli_button_timeout[i] > 0) {
-      cli_button_timeout[i]--;
+    if (tui_button_timeout[i] > 0) {
+      tui_button_timeout[i]--;
     } else {
-      cli_controller_state &= ~cli_button_map[i];
+      tui_controller_state &= ~tui_button_map[i];
     }
   }
 #endif
@@ -797,33 +797,33 @@ void cli_update(void)
   }
 #endif
 
-  if (cli_freeze_step) {
-    cli_freeze = true;
-    cli_freeze_step = false;
+  if (tui_freeze_step) {
+    tui_freeze = true;
+    tui_freeze_step = false;
   }
-cli_update_freeze:
+tui_update_freeze:
   refresh();
-  getmaxyx(stdscr, cli_maxy, cli_maxx);
+  getmaxyx(stdscr, tui_maxy, tui_maxx);
 
-  if (cli_basic_mode) {
-    if (cli_text_inject_fh != NULL) {
+  if (tui_basic_mode) {
+    if (tui_text_inject_fh != NULL) {
       static int inject_delay = 0;
 
       if (inject_delay > 0) {
         inject_delay--;
       } else {
-        c = fgetc(cli_text_inject_fh);
+        c = fgetc(tui_text_inject_fh);
         if (c == EOF) {
-          fclose(cli_text_inject_fh);
-          cli_text_inject_fh = NULL;
+          fclose(tui_text_inject_fh);
+          tui_text_inject_fh = NULL;
         }
-        kbd_key_set(cli_key_map(c),
-                    cli_key_is_shifted(c),
-                    cli_key_is_control(c));
-        if (cli_key_map(c) == KBD_KEY_RETURN) {
-          inject_delay = CLI_TEXT_INJECT_DELAY_RETURN;
+        kbd_key_set(tui_key_map(c),
+                    tui_key_is_shifted(c),
+                    tui_key_is_control(c));
+        if (tui_key_map(c) == KBD_KEY_RETURN) {
+          inject_delay = TUI_TEXT_INJECT_DELAY_RETURN;
         } else {
-          inject_delay = CLI_TEXT_INJECT_DELAY_NORMAL;
+          inject_delay = TUI_TEXT_INJECT_DELAY_NORMAL;
         }
       }
       return;
@@ -831,11 +831,11 @@ cli_update_freeze:
 
     while ((c = getch()) != ERR) {
       if (c == KEY_RESIZE) {
-        cli_winch_handler();
+        tui_winch_handler();
       } else {
-        kbd_key_set(cli_key_map(c),
-                    cli_key_is_shifted(c),
-                    cli_key_is_control(c));
+        kbd_key_set(tui_key_map(c),
+                    tui_key_is_shifted(c),
+                    tui_key_is_control(c));
       }
     }
 
@@ -844,131 +844,131 @@ cli_update_freeze:
       switch (c) {
       case KEY_RESIZE:
         /* Use this event instead of SIGWINCH for better portability. */
-        cli_winch_handler();
+        tui_winch_handler();
         break;
 
 #ifdef SPECIAL_TERMINAL /* Separate key press and key release events. */
       case 'h': /* Press A */
       case ',':
-        cli_controller_state |= 0x1;
+        tui_controller_state |= 0x1;
         break;
 
       case 'j': /* Press B */
       case '0':
-        cli_controller_state |= 0x2;
+        tui_controller_state |= 0x2;
         break;
 
       case 'k': /* Press Select */
-        cli_controller_state |= 0x4;
+        tui_controller_state |= 0x4;
         break;
 
       case 'l': /* Press Start */
-        cli_controller_state |= 0x8;
+        tui_controller_state |= 0x8;
         break;
 
       case 'w': /* Press Up */
-        cli_controller_state |= 0x10;
+        tui_controller_state |= 0x10;
         break;
 
       case 's': /* Press Down */
-        cli_controller_state |= 0x20;
+        tui_controller_state |= 0x20;
         break;
 
       case 'a': /* Press Left */
-        cli_controller_state |= 0x40;
+        tui_controller_state |= 0x40;
         break;
 
       case 'd': /* Press Right */
-        cli_controller_state |= 0x80;
+        tui_controller_state |= 0x80;
         break;
 
       case 'H': /* Release A */
       case ';':
-        cli_controller_state &= ~0x1;
+        tui_controller_state &= ~0x1;
         break;
 
       case 'J': /* Release B */
       case '=':
-        cli_controller_state &= ~0x2;
+        tui_controller_state &= ~0x2;
         break;
 
       case 'K': /* Release Select */
-        cli_controller_state &= ~0x4;
+        tui_controller_state &= ~0x4;
         break;
 
       case 'L': /* Release Start */
-        cli_controller_state &= ~0x8;
+        tui_controller_state &= ~0x8;
         break;
 
       case 'W': /* Release Up */
-        cli_controller_state &= ~0x10;
+        tui_controller_state &= ~0x10;
         break;
 
       case 'S': /* Release Down */
-        cli_controller_state &= ~0x20;
+        tui_controller_state &= ~0x20;
         break;
 
       case 'A': /* Release Left */
-        cli_controller_state &= ~0x40;
+        tui_controller_state &= ~0x40;
         break;
 
       case 'D': /* Release Right */
-        cli_controller_state &= ~0x80;
+        tui_controller_state &= ~0x80;
         break;
 
 #else
       case ' ':
       case 'z': /* A */
-        cli_controller_state |= 0x1;
-        cli_button_timeout[0] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0x1;
+        tui_button_timeout[0] = TUI_BUTTON_TIME_SET;
         break;
 
       case 'x': /* B */
-        cli_controller_state |= 0x2;
-        cli_button_timeout[1] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X2;
+        tui_button_timeout[1] = TUI_BUTTON_TIME_SET;
         break;
 
       case 'c': /* Select */
-        cli_controller_state |= 0x4;
-        cli_button_timeout[2] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X4;
+        tui_button_timeout[2] = TUI_BUTTON_TIME_SET;
         break;
 
       case KEY_ENTER:
       case '\n':
       case '\r':
       case 'v': /* Start */
-        cli_controller_state |= 0x8;
-        cli_button_timeout[3] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X8;
+        tui_button_timeout[3] = TUI_BUTTON_TIME_SET;
         break;
 
       case KEY_UP:
-        cli_controller_state |= 0x10;
-        cli_button_timeout[4] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X10;
+        tui_button_timeout[4] = TUI_BUTTON_TIME_SET;
         break;
 
       case KEY_DOWN:
-        cli_controller_state |= 0x20;
-        cli_button_timeout[5] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X20;
+        tui_button_timeout[5] = TUI_BUTTON_TIME_SET;
         break;
 
       case KEY_LEFT:
-        cli_controller_state |= 0x40;
-        cli_button_timeout[6] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X40;
+        tui_button_timeout[6] = TUI_BUTTON_TIME_SET;
         break;
 
       case KEY_RIGHT:
-        cli_controller_state |= 0x80;
-        cli_button_timeout[7] = CLI_BUTTON_TIME_SET;
+        tui_controller_state |= 0X80;
+        tui_button_timeout[7] = TUI_BUTTON_TIME_SET;
         break;
 
       case 'P':
       case 'p':
-        cli_freeze = !cli_freeze;
+        tui_freeze = !tui_freeze;
         break;
 
       case '.':
-        cli_freeze = false;
-        cli_freeze_step = true;
+        tui_freeze = false;
+        tui_freeze_step = true;
         break;
 #endif
 
@@ -982,8 +982,8 @@ cli_update_freeze:
       }
     }
 
-    if (cli_freeze) {
-      goto cli_update_freeze;
+    if (tui_freeze) {
+      goto tui_update_freeze;
     }
   }
 }

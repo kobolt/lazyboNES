@@ -8,7 +8,7 @@ LDFLAGS=-lSDL2 -lm -L../SDL2-2.0.20/i686-w64-mingw32/lib
 
 all: lazyboNES
 
-lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o fds.o kbd.o gui.o cli.o tas.o pdcurses.a
+lazyboNES: main.o cpu.o mem.o ines.o ppu.o apu.o fds.o kbd.o gui.o tui.o tas.o pdcurses.a
 	gcc -o lazyboNES $^ ${LDFLAGS}
 
 main.o: main.c
@@ -38,7 +38,7 @@ kbd.o: kbd.c
 gui.o: gui.c
 	gcc -c $^ ${CFLAGS}
 
-cli.o: cli.c
+tui.o: tui.c
 	gcc -c $^ ${CFLAGS}
 
 tas.o: tas.c

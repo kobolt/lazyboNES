@@ -16,14 +16,8 @@
 #include "fds.h"
 #include "kbd.h"
 #include "gui.h"
-#include "cli.h"
+#include "tui.h"
 #include "tas.h"
-
-
-
-#define DEBUGGER_KEYBOARD_INJECT_FILE "input.txt"
-#define DEBUGGER_CASSETTE_LOAD_FILE "cas.wav"
-#define DEBUGGER_CASSETTE_SAVE_FILE "cas.wav"
 
 
 
@@ -48,21 +42,39 @@ static fds_t save_fds;
 static bool debugger(void)
 {
   int i;
-  char cmd[16];
+  char input[128];
+  char *argv[2];
+  int argc;
   int result;
 
   fprintf(stdout, "\n");
   while (1) {
     fprintf(stdout, "%08d:%04x> ", main_ppu.frame_no, main_cpu.pc);
 
-    if (fgets(cmd, sizeof(cmd), stdin) == NULL) {
+    if (fgets(input, sizeof(input), stdin) == NULL) {
       if (feof(stdin)) {
         exit(EXIT_SUCCESS);
       }
       continue;
     }
 
-    switch (cmd[0]) {
+    if ((strlen(input) > 0) && (input[strlen(input) - 1] == '\n')) {
+      input[strlen(input) - 1] = '\0'; /* Strip newline. */
+    }
+
+    argv[0] = strtok(input, " ");
+    if (argv[0] == NULL) {
+      continue;
+    }
+
+    for (argc = 1; argc < 2; argc++) {
+      argv[argc] = strtok(NULL, " ");
+      if (argv[argc] == NULL) {
+        break;
+      }
+    }
+
+    switch (argv[0][0]) {
     case '?':
     case 'h':
       fprintf(stdout, "Commands:\n");
@@ -80,13 +92,10 @@ static bool debugger(void)
       fprintf(stdout, "  6 - Dump other RAM\n");
       fprintf(stdout, "  7 - Dump FDS\n");
       fprintf(stdout, "BASIC Mode Commands:\n");
-      fprintf(stdout, "  t - Inject \""
-        DEBUGGER_KEYBOARD_INJECT_FILE "\" text file as keyboard input.\n");
-      fprintf(stdout, "  l - Load \""
-        DEBUGGER_CASSETTE_LOAD_FILE "\" cassette WAV file.\n");
-      fprintf(stdout, "  k - Start saving \""
-        DEBUGGER_CASSETTE_SAVE_FILE "\" cassette WAV file.\n");
-      fprintf(stdout, "  K - Stop saving cassette WAV file.\n");
+      fprintf(stdout, "  t <file> - Inject text file as keyboard input.\n");
+      fprintf(stdout, "  l <file> - Load cassette WAV file.\n");
+      fprintf(stdout, "  k <file> - Start saving cassette WAV file.\n");
+      fprintf(stdout, "  K        - Stop saving cassette WAV file.\n");
       break;
 
     case 'c': /* Continue */
@@ -110,32 +119,44 @@ static bool debugger(void)
       break;
 
     case 't':
-      result = cli_text_inject(DEBUGGER_KEYBOARD_INJECT_FILE);
-      if (result != 0) {
-        fprintf(stdout, "Failed to inject text file! Error Code: %d\n",
+      if (argc >= 2) {
+        result = tui_text_inject(argv[1]);
+        if (result != 0) {
+          fprintf(stdout, "Failed to inject text file! Error Code: %d\n",
             result);
+        } else {
+          fprintf(stdout, "Injecting text file '%s'...\n", argv[1]);
+        }
       } else {
-        fprintf(stdout, "Injecting text file...\n");
+        fprintf(stdout, "Specify filename!\n");
       }
       break;
 
     case 'l':
-      result = kbd_cassette_load_file(DEBUGGER_CASSETTE_LOAD_FILE);
-      if (result != 0) {
-        fprintf(stdout, "Failed to start load WAV file! Code: %d\n",
-          result);
+      if (argc >= 2) {
+        result = kbd_cassette_load_file(argv[1]);
+        if (result != 0) {
+          fprintf(stdout, "Failed to start load WAV file! Code: %d\n",
+            result);
+        } else {
+          fprintf(stdout, "Cassette WAV file '%s' playback...\n", argv[1]);
+        }
       } else {
-        fprintf(stdout, "Cassette WAV file playback...\n");
+        fprintf(stdout, "Specify filename!\n");
       }
       break;
 
     case 'k':
-      result = kbd_cassette_save_file_start(DEBUGGER_CASSETTE_SAVE_FILE);
-      if (result != 0) {
-        fprintf(stdout, "Failed to start saving of WAV file! Code: %d\n",
-          result);
+      if (argc >= 2) {
+        result = kbd_cassette_save_file_start(argv[1]);
+        if (result != 0) {
+          fprintf(stdout, "Failed to start saving of WAV file! Code: %d\n",
+            result);
+        } else {
+          fprintf(stdout, "Cassette WAV file '%s' recording...\n", argv[1]);
+        }
       } else {
-        fprintf(stdout, "Cassette WAV file recording...\n");
+        fprintf(stdout, "Specify filename!\n");
       }
       break;
 
@@ -226,7 +247,7 @@ void panic(const char *format, ...)
 {
   va_list args;
 
-  cli_pause(); /* Turn off to let text appear. */
+  tui_pause(); /* Turn off to let text appear. */
 
   va_start(args, format);
   vfprintf(stderr, format, args);
@@ -373,8 +394,8 @@ int main(int argc, char *argv[])
   }
 
   if (! disable_terminal) {
-    if (cli_init(enable_colors, basic_mode) != 0) {
-      fprintf(stderr, "Failed to initialize CLI!\n");
+    if (tui_init(enable_colors, basic_mode) != 0) {
+      fprintf(stderr, "Failed to initialize TUI!\n");
       return EXIT_FAILURE;
     }
   }
@@ -416,9 +437,9 @@ int main(int argc, char *argv[])
       kbd_key_clear();
       gui_update();
 #ifdef EXTRA_INFO
-      cli_update(&main_mem, &main_ppu, &main_apu);
+      tui_update(&main_mem, &main_ppu, &main_apu);
 #else
-      cli_update();
+      tui_update();
 #endif
       tas_update(main_ppu.frame_no);
 
@@ -444,10 +465,10 @@ int main(int argc, char *argv[])
     }
 
     if (debugger_break) {
-      cli_pause();
+      tui_pause();
       debugger_break = debugger();
       if (! debugger_break) {
-        cli_resume();
+        tui_resume();
       }
     }
   }

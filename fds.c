@@ -180,6 +180,9 @@ void fds_init(fds_t *fds, mem_t *mem, ppu_t *ppu)
   /* Special connection to the PPU for mirroring: */
   fds->ppu = ppu;
 
+  /* Internal wait delay: */
+  fds->wait = FDS_WAIT_CYCLES;
+
   /* Timer: */
   fds->timer_irq_enable   = false;
   fds->timer_irq_repeat   = false;
@@ -367,15 +370,13 @@ static uint8_t fds_image_read(fds_t *fds)
 
 void fds_execute(fds_t *fds)
 {
-  static int wait = FDS_WAIT_CYCLES;
-
   if (fds->irq_transfer && fds->ack_disk_irq) {
-    if (wait > 0) {
+    if (fds->wait > 0) {
       /* Need to wait for FDS BIOS to be ready. */
-      wait--;
+      fds->wait--;
     } else {
       /* Now the byte can be transferred. */
-      wait = FDS_WAIT_CYCLES;
+      fds->wait = FDS_WAIT_CYCLES;
       fds->ack_disk_irq = false;
       fds->trigger_irq = true;
       fds->timer_irq_occurred = false;
